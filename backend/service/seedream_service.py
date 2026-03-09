@@ -102,33 +102,31 @@ def _call_gemini_generate(
     reference_images: List[bytes],
 ) -> bytes:
     """
-    调用 Gemini API 生成图片
+    调用 Gemini API 生成图片（结合 Google 官方多图+图片生成两个示例）
 
-    使用 gemini-3.1-flash-image-preview（Nano Banana 2）模型
-    按照 Google 官方示例：传入 PIL Image 对象 + prompt
-
-    图片顺序（由调用方保证）:
-      reference_images[0] = 用户照片（prompt 中的"图片1"）
-      reference_images[1] = 明星参考图（prompt 中的"图片2"）
+    contents 顺序：[prompt_text, image1_Part, image2_Part, ...]
+      image1 = 用户照片（prompt 中的"图片1"）
+      image2 = 明星参考图（prompt 中的"图片2"）
 
     @param prompt 生成提示词
-    @param reference_images 参考图片字节列表
+    @param reference_images 参考图片字节列表（已按顺序排好）
     @returns 生成的图片字节数据
     """
+    from google.genai import types
+
     client = _get_gemini_client()
 
-    # 按照 Google 官方示例：contents = [prompt, image1, image2, ...]
-    # prompt 放最前面，图片按顺序放后面
+    # 构建 contents：prompt 在前，图片用 Part.from_bytes 在后
     contents: list = [prompt]
 
     for idx, img_bytes in enumerate(reference_images):
-        try:
-            compressed = _compress_image(img_bytes)
-            pil_img = Image.open(io.BytesIO(compressed))
-            contents.append(pil_img)
-            logger.info(f"参考图片{idx + 1} 已加载，尺寸={pil_img.size}")
-        except Exception as e:
-            logger.warning(f"参考图片{idx + 1} 加载失败: {e}")
+        compressed = _compress_image(img_bytes)
+        part = types.Part.from_bytes(
+            data=compressed,
+            mime_type="image/jpeg",
+        )
+        contents.append(part)
+        logger.info(f"参考图片{idx + 1} 已添加，大小={len(compressed)} bytes")
 
     logger.info(
         f"调用 Gemini API，模型=gemini-2.5-flash-preview-image-generation，"
@@ -139,31 +137,38 @@ def _call_gemini_generate(
         response = client.models.generate_content(
             model="gemini-2.5-flash-preview-image-generation",
             contents=contents,
-            config={
-                "response_modalities": ["TEXT", "IMAGE"],
-            },
+            config=types.GenerateContentConfig(
+                response_modalities=["TEXT", "IMAGE"],
+            ),
         )
     except Exception as e:
         logger.error(f"Gemini API 调用失败: {e}")
         raise ValueError(f"AI 生图失败: {e}")
 
-    # 按照官方示例解析响应
+    # 解析响应：提取生成的图片
     if response.candidates:
         for candidate in response.candidates:
             if candidate.content and candidate.content.parts:
                 for part in candidate.content.parts:
+                    # 方式1：inline_data 直接取字节
                     if part.inline_data is not None:
-                        # 方式1：直接从 inline_data 获取字节
                         if hasattr(part.inline_data, 'data') and part.inline_data.data:
+                            logger.info(f"生图成功，大小={len(part.inline_data.data)} bytes")
                             return part.inline_data.data
-                        # 方式2：用 as_image() 转为 PIL 再保存
-                        try:
+                    # 方式2：用 as_image() 转 PIL 再导出
+                    try:
+                        if hasattr(part, 'as_image'):
                             pil_result = part.as_image()
                             buf = io.BytesIO()
                             pil_result.save(buf, format="PNG")
-                            return buf.getvalue()
-                        except Exception:
-                            pass
+                            result_bytes = buf.getvalue()
+                            logger.info(f"生图成功(PIL)，大小={len(result_bytes)} bytes")
+                            return result_bytes
+                    except Exception:
+                        pass
+                    # 记录文本响应（如有）
+                    if part.text:
+                        logger.info(f"Gemini 文本响应: {part.text[:100]}")
 
     raise ValueError("Gemini API 未返回图片数据，请检查 prompt 或重试")
 
