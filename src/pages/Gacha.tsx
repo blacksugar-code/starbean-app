@@ -448,10 +448,10 @@ export const Gacha: React.FC = () => {
               {/* 存入卡包 */}
               <button
                 onClick={handleSaveToCollection}
-                className="w-full py-2.5 rounded-2xl text-sm text-white/50 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                className="w-full py-3.5 rounded-2xl text-sm font-bold text-white/80 border border-white/20 bg-white/10 flex items-center justify-center gap-2 active:scale-95 transition-transform backdrop-blur-sm"
               >
-                <Archive className="w-4 h-4" />
-                先存入卡包，稍后生成
+                <Archive className="w-5 h-5" />
+                存入卡包，稍后生成
               </button>
             </motion.div>
 
