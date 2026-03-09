@@ -4,7 +4,13 @@
  */
 
 // NOTE: 本地开发走 Vite 代理（/api），Vercel 部署时通过环境变量指向后端地址
-const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+export const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+
+/**
+ * 后端根地址（不含 /api），用于拼接 /uploads 等静态资源路径
+ * 例如本地为 ''，部署时为 'https://starbean-app.onrender.com'
+ */
+export const BACKEND_BASE = API_BASE.replace(/\/api$/, '');
 
 /**
  * 通用请求封装

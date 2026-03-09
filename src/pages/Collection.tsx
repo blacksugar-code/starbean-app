@@ -4,6 +4,7 @@ import { BottomNav } from '../components/BottomNav';
 import { Search, ChevronRight, Image as ImageIcon, Loader2, Camera, Sparkles, User, Upload, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import * as api from '../services/api';
+import { API_BASE } from '../services/api';
 
 /** 卡牌数据（后端返回） */
 interface CardData {
@@ -130,8 +131,8 @@ export const Collection: React.FC = () => {
     const fetchData = async () => {
       try {
         const [cardsRes, templatesRes] = await Promise.all([
-          fetch(`/api/gacha/cards/${user.id}`).then((r) => r.json()),
-          fetch('/api/templates').then((r) => r.json()),
+          fetch(`{API_BASE}/gacha/cards/${user.id}`).then((r) => r.json()),
+          fetch(API_BASE + '/templates').then((r) => r.json()),
         ]);
 
         setCards(cardsRes.cards || []);

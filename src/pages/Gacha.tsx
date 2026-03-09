@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ChevronLeft, Gem, Loader2, Camera, Archive, Star, Upload, User } from 'lucide-react';
 import { useStore, Card } from '../store/useStore';
 import * as api from '../services/api';
+import { API_BASE } from '../services/api';
 
 type Stage = 'idle' | 'animating' | 'reveal' | 'generating';
 
@@ -49,7 +50,7 @@ export const Gacha: React.FC = () => {
   useEffect(() => {
     const fetchTemplate = async () => {
       try {
-        const data = await fetch(`/api/templates/${id}`).then((r) => r.json());
+        const data = await fetch(`${API_BASE}/templates/${id}`).then((r) => r.json());
         setTemplate(data);
       } catch (e) {
         console.error('获取模板失败:', e);

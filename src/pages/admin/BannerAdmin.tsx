@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, GripVertical, ImageIcon, X, Loader2 } from 'lucide-react';
 import * as api from '../../services/api';
+import { API_BASE } from '../../services/api';
 
 interface Banner {
   id: string;
@@ -27,7 +28,7 @@ export const BannerAdmin: React.FC = () => {
   const fetchBanners = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/banners');
+      const res = await fetch(API_BASE + '/admin/banners');
       const data = await res.json();
       setBanners(data);
     } catch (e) {
@@ -83,7 +84,7 @@ export const BannerAdmin: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('确定要删除此 Banner 吗？')) return;
     try {
-      await fetch(`/api/admin/banners/${id}`, { method: 'DELETE' });
+      await fetch(`{API_BASE}/admin/banners/${id}`, { method: 'DELETE' });
       fetchBanners();
     } catch (err) {
       alert('删除失败');

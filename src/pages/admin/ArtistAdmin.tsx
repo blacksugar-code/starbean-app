@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Star, X, Loader2, ImageIcon } from 'lucide-react';
 import * as api from '../../services/api';
+import { API_BASE } from '../../services/api';
 
 interface Artist {
   id: string;
@@ -27,7 +28,7 @@ export const ArtistAdmin: React.FC = () => {
   const fetchArtists = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/artists');
+      const res = await fetch(API_BASE + '/admin/artists');
       const data = await res.json();
       setArtists(data);
     } catch (e) {
@@ -78,7 +79,7 @@ export const ArtistAdmin: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('确定要删除该明星？关联的模板不会被删除。')) return;
     try {
-      await fetch(`/api/admin/artists/${id}`, { method: 'DELETE' });
+      await fetch(`{API_BASE}/admin/artists/${id}`, { method: 'DELETE' });
       fetchArtists();
     } catch {
       alert('删除失败');

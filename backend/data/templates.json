@@ -42,5 +42,137 @@
     "is_published": true,
     "id": "56d19b31-299c-47e1-ad97-5e0301d83ade",
     "created_at": "2026-03-08T23:21:59.425598"
+  },
+  {
+    "title": "《逐玉》武安侯",
+    "artist_name": "张凌赫",
+    "cover_image": "/api/uploads/8ac9e425-810a-4fc5-b4dc-1573e6c50ff5.jpg",
+    "detail_image": "",
+    "artist_ref_images": [
+      "/api/uploads/4ab64ef4-9f33-4ec9-91c3-b88b81548c9d.jpg"
+    ],
+    "template_prompt": "N:两人合照，保持人物一致性。保持距离。大师级构图，大师级灯光，2k。||R:两人合照，保持人物一致性。合影姿势，无触碰。大师级构图，大师级灯光，2k。||SR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。||SSR:两人合照，保持人物一致性。亲密友好互动，亲密，温柔拥抱、轻靠、自然贴贴，高甜氛围感，姿势优雅不越界。大师级构图，大师级灯光，2k。",
+    "single_draw_price": 99,
+    "ten_draw_price": 890,
+    "description": "来和武安侯合照吧",
+    "rarity_rates": {
+      "N": "70%",
+      "R": "20%",
+      "SR": "8%",
+      "SSR": "2%"
+    },
+    "is_published": true,
+    "id": "7396a969-0c74-44fe-a5a3-334adb4caa46",
+    "created_at": "2026-03-09T12:07:27.565567"
+  },
+  {
+    "title": "张元英 is calling",
+    "artist_name": "张元英",
+    "cover_image": "/api/uploads/a30ce55d-bb56-429d-b9da-c2fc7a9f4ed0.jpg",
+    "detail_image": "",
+    "artist_ref_images": [
+      "/api/uploads/68391b5f-aba9-41b8-8b5b-405b05e296a1.jpg"
+    ],
+    "template_prompt": "N:两人合照，保持人物一致性。保持距离。大师级构图，大师级灯光，2k。||R:两人合照，保持人物一致性。合影姿势，无触碰。大师级构图，大师级灯光，2k。||SR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。||SSR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。",
+    "single_draw_price": 99,
+    "ten_draw_price": 890,
+    "description": "快来和张元英一起合照吧",
+    "rarity_rates": {
+      "N": "70%",
+      "R": "20%",
+      "SR": "8%",
+      "SSR": "2%"
+    },
+    "is_published": true,
+    "id": "73205d41-1c24-43c2-96a1-09e0b4ae0900",
+    "created_at": "2026-03-09T12:09:24.809754"
+  },
+  {
+    "title": "王一博的After Party",
+    "artist_name": "王一博",
+    "cover_image": "/api/uploads/f7b22a5e-ca56-4e13-a06a-b7b0ac5ea640.jpg",
+    "detail_image": "",
+    "artist_ref_images": [
+      "/api/uploads/bd94c980-dfe0-42cb-b3a2-3beb07a9fc73.jpg"
+    ],
+    "template_prompt": "N:两人合照，保持人物一致性。保持距离。大师级构图，大师级灯光，2k。||R:两人合照，保持人物一致性。合影姿势，无触碰。大师级构图，大师级灯光，2k。||SR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。||SSR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。",
+    "single_draw_price": 99,
+    "ten_draw_price": 890,
+    "description": "快来和王一博和拍吧",
+    "rarity_rates": {
+      "N": "70%",
+      "R": "20%",
+      "SR": "8%",
+      "SSR": "2%"
+    },
+    "is_published": true,
+    "id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "created_at": "2026-03-09T12:11:21.801435"
+  },
+  {
+    "title": "肖战“晚宴”",
+    "artist_name": "肖战",
+    "cover_image": "/api/uploads/b25f3901-2c88-425f-b110-18407f96ddd9.jpg",
+    "detail_image": "",
+    "artist_ref_images": [
+      "/api/uploads/2c648b12-1550-4203-906c-733082d8a9b2.jpg"
+    ],
+    "template_prompt": "N:两人合照，保持人物一致性。保持距离。大师级构图，大师级灯光，2k。||R:两人合照，保持人物一致性。合影姿势，无触碰。大师级构图，大师级灯光，2k。||SR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。||SSR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。",
+    "single_draw_price": 99,
+    "ten_draw_price": 890,
+    "description": "快来和肖战和拍吧",
+    "rarity_rates": {
+      "N": "70%",
+      "R": "20%",
+      "SR": "8%",
+      "SSR": "2%"
+    },
+    "is_published": true,
+    "id": "e4ce5914-65a3-49cb-bf01-c918747403e0",
+    "created_at": "2026-03-09T12:12:19.200300"
+  },
+  {
+    "title": "棣棣“写真”",
+    "artist_name": "王鹤棣",
+    "cover_image": "/api/uploads/3e10e19a-69f1-4f36-a32c-b20e4e14bc92.jpeg",
+    "detail_image": "",
+    "artist_ref_images": [
+      "/api/uploads/420e1d8d-f637-4d1c-a392-e8e7da628612.jpeg"
+    ],
+    "template_prompt": "N:两人合照，保持人物一致性。保持距离。大师级构图，大师级灯光，2k。||R:两人合照，保持人物一致性。合影姿势，无触碰。大师级构图，大师级灯光，2k。||SR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。||SSR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。",
+    "single_draw_price": 99,
+    "ten_draw_price": 890,
+    "description": "",
+    "rarity_rates": {
+      "N": "70%",
+      "R": "20%",
+      "SR": "8%",
+      "SSR": "2%"
+    },
+    "is_published": true,
+    "id": "cc0905a3-ba3f-42fb-b358-ccf219f88bb1",
+    "created_at": "2026-03-09T12:13:27.839186"
+  },
+  {
+    "title": "谭建次“Come With Me”",
+    "artist_name": "谭建次",
+    "cover_image": "/api/uploads/21355abe-10f0-4ae8-83ae-e97608d6eada.jpeg",
+    "detail_image": "",
+    "artist_ref_images": [
+      "/api/uploads/2d21c2ad-d603-485b-9a34-4f5cbcfd15f2.jpeg"
+    ],
+    "template_prompt": "N:两人合照，保持人物一致性。保持距离。大师级构图，大师级灯光，2k。||R:两人合照，保持人物一致性。合影姿势，无触碰。大师级构图，大师级灯光，2k。||SR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。||SSR:两人合照，保持人物一致性。亲密友好互动，自然牵手、搭肩或一起比心，姿势自然甜系。大师级构图，大师级灯光，2k。",
+    "single_draw_price": 99,
+    "ten_draw_price": 890,
+    "description": "",
+    "rarity_rates": {
+      "N": "70%",
+      "R": "20%",
+      "SR": "8%",
+      "SSR": "2%"
+    },
+    "is_published": true,
+    "id": "b230959c-935f-47c4-8d2d-ad5375d23a91",
+    "created_at": "2026-03-09T12:15:10.943196"
   }
 ]

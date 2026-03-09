@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, ShoppingBag, Calendar, User, Mail, Plus, Camera, Heart, Verified, Trophy, Crown, Loader2 } from 'lucide-react';
 import { BottomNav } from '../components/BottomNav';
 import * as api from '../services/api';
+import { API_BASE } from '../services/api';
 
 export const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'recommend' | 'star' | 'luck'>('recommend');
@@ -25,7 +26,7 @@ export const Home: React.FC = () => {
       try {
         const [tplData, bannerData] = await Promise.all([
           api.getTemplates(),
-          fetch('/api/admin/banners').then((r) => r.json()).catch(() => []),
+          fetch(API_BASE + '/admin/banners').then((r) => r.json()).catch(() => []),
         ]);
         setTemplates(tplData);
         setBanners(bannerData);

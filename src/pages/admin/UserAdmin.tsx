@@ -1,3 +1,4 @@
+import { API_BASE } from '../../services/api';
 import React, { useState, useEffect } from 'react';
 import { Trash2, Users, Eye, X, Loader2, Edit2, Gem, Check } from 'lucide-react';
 
@@ -36,7 +37,7 @@ export const UserAdmin: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const data = await fetch('/api/admin/users').then((r) => r.json());
+      const data = await fetch(API_BASE + '/admin/users').then((r) => r.json());
       setUsers(data);
     } catch { /* empty */ } finally { setLoading(false); }
   };
@@ -47,14 +48,14 @@ export const UserAdmin: React.FC = () => {
     setSelectedUser(user);
     setLoadingCards(true);
     try {
-      const data = await fetch(`/api/gacha/cards/${user.id}`).then((r) => r.json());
+      const data = await fetch(`{API_BASE}/gacha/cards/${user.id}`).then((r) => r.json());
       setUserCards(data.cards || []);
     } catch { setUserCards([]); } finally { setLoadingCards(false); }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('确定删除？不可恢复！')) return;
-    await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+    await fetch(`{API_BASE}/admin/users/${id}`, { method: 'DELETE' });
     fetchUsers();
   };
 
@@ -74,7 +75,7 @@ export const UserAdmin: React.FC = () => {
     }
     setSavingBeans(true);
     try {
-      const res = await fetch(`/api/admin/users/${editingUser.id}/beans`, {
+      const res = await fetch(`{API_BASE}/admin/users/${editingUser.id}/beans`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ star_beans: newBeans }),

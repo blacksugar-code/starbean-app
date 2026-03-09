@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, MessageSquare, X, Loader2, ImageIcon } from 'lucide-react';
 import * as api from '../../services/api';
+import { API_BASE } from '../../services/api';
 
 interface Post {
   id: string;
@@ -24,7 +25,7 @@ export const CommunityAdmin: React.FC = () => {
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const data = await fetch('/api/posts?limit=100').then((r) => r.json());
+      const data = await fetch(API_BASE + '/posts?limit=100').then((r) => r.json());
       setPosts(data);
     } catch { /* empty */ } finally { setLoading(false); }
   };
@@ -45,7 +46,7 @@ export const CommunityAdmin: React.FC = () => {
     if (!formData.content.trim()) { alert('请填写内容'); return; }
     setSaving(true);
     try {
-      await fetch('/api/posts', {
+      await fetch(API_BASE + '/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: 'admin', content: formData.content, image_url: formData.image_url }),
@@ -58,7 +59,7 @@ export const CommunityAdmin: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm('确定删除该帖子？')) return;
-    await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+    await fetch(`{API_BASE}/posts/${id}`, { method: 'DELETE' });
     fetchPosts();
   };
 

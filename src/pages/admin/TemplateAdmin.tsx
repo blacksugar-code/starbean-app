@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, LayoutGrid, X, Loader2, ImageIcon, Upload } from 'lucide-react';
 import * as api from '../../services/api';
+import { API_BASE } from '../../services/api';
 
 interface Artist {
   id: string;
@@ -50,8 +51,8 @@ export const TemplateAdmin: React.FC = () => {
     setLoading(true);
     try {
       const [tplRes, artistRes] = await Promise.all([
-        fetch('/api/templates?all=true').then((r) => r.json()),
-        fetch('/api/admin/artists').then((r) => r.json()),
+        fetch(API_BASE + '/templates?all=true').then((r) => r.json()),
+        fetch(API_BASE + '/admin/artists').then((r) => r.json()),
       ]);
       setTemplates(tplRes);
       setArtists(artistRes);
@@ -125,13 +126,13 @@ export const TemplateAdmin: React.FC = () => {
 
       let res: Response;
       if (editingId) {
-        res = await fetch(`/api/templates/${editingId}`, {
+        res = await fetch(`{API_BASE}/templates/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
       } else {
-        res = await fetch('/api/templates', {
+        res = await fetch(API_BASE + '/templates', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
@@ -160,7 +161,7 @@ export const TemplateAdmin: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await fetch(`/api/templates/${id}`, { method: 'DELETE' });
+      await fetch(`{API_BASE}/templates/${id}`, { method: 'DELETE' });
       setDeletingId(null);
       fetchData();
     } catch {
