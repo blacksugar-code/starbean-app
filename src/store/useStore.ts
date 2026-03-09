@@ -360,6 +360,17 @@ export const useStore = create<StoreState>()(
     {
       // NOTE: persist key 改为 starbean-auth，api.ts 的 getAuthToken 需要与此一致
       name: 'starbean-auth',
+      // NOTE: 只持久化认证信息和精简用户数据，不存 collection（含大量 base64 图片会超 localStorage 5MB 限制）
+      partialize: (state) => ({
+        token: state.token,
+        user: {
+          ...state.user,
+          // 排除 collection 和含 data URI 的大字段
+          collection: [],
+          avatarUrl: state.user.avatarUrl?.startsWith('data:') ? '' : state.user.avatarUrl,
+          digitalAvatarUrl: state.user.digitalAvatarUrl?.startsWith('data:') ? '' : state.user.digitalAvatarUrl,
+        },
+      }),
     },
   ),
 );
