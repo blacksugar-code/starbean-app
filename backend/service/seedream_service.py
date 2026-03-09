@@ -131,7 +131,7 @@ def _call_gemini_generate(
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
+            model="gemini-2.0-flash-exp-image-generation",
             contents=parts,
             config=types.GenerateContentConfig(
                 response_modalities=["TEXT", "IMAGE"],
