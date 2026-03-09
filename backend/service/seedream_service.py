@@ -216,85 +216,54 @@ class SeedreamService:
         artist_ref_images: List[str],
         template_prompt: str,
         rarity: str,
-        mode: str = "avatar",
+        mode: str = "photo",
         user_photo_b64: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
-        生成合照（双模式）
+        生成合照 — 仅支持照片合拍模式
 
-        模式 avatar — 用户虚拟形象 + 明星参考图 → 合照
-        模式 photo — 明星参考图 + 用户上传照片 → 将明星融入用户照片
+        图片顺序（严格）：
+          图片1 = 用户上传的照片（先传，被 prompt 识别为"图片1"）
+          图片2 = 明星参考图（后传，被 prompt 识别为"图片2"）
 
-        @param user_avatar_url 用户虚拟形象 URL（avatar 模式用）
+        @param user_avatar_url 保留参数兼容性（不再使用）
         @param artist_ref_images 艺人参考图 URL 列表
-        @param template_prompt 模板提示词（按等级区分）
+        @param template_prompt 已按等级解析的 prompt（直接使用）
         @param rarity 卡牌等级 N/R/SR/SSR
-        @param mode 生成模式 avatar | photo
-        @param user_photo_b64 用户上传的照片 base64（photo 模式用）
-        @returns 包含 id, image_url, status 的字典
+        @param mode 保留参数兼容性（始终为 photo）
+        @param user_photo_b64 用户上传的照片 base64
+        @returns 包含 id, image_url, image_b64, status 的字典
         """
         fusion_id = str(uuid.uuid4())
-
-        # 稀有度画质增强标签
-        rarity_tags = {
-            "N": "自然画质, 日常感",
-            "R": "电影感, 胶片画风",
-            "SR": "梦幻光斑, 唯美写实, 8K高清",
-            "SSR": "大师级摄影, 极致细节, 特写构图, 史诗级画面, 16K超清",
-        }
-
         ref_images: List[bytes] = []
 
-        if mode == "photo":
-            # ===== 照片合拍模式 =====
-            for url in (artist_ref_images or [])[:2]:
-                img_bytes = _load_image_bytes(url)
-                if img_bytes:
-                    ref_images.append(img_bytes)
+        # ===== 图片1：用户上传的照片（必须第一个传入） =====
+        if not user_photo_b64:
+            raise ValueError("请上传一张你的照片进行合拍")
 
-            if not ref_images:
-                raise ValueError("合照生成失败：明星参考图无法加载")
+        if user_photo_b64.startswith("data:"):
+            user_photo_b64 = user_photo_b64.split(",", 1)[-1]
+        user_photo_bytes = base64.b64decode(user_photo_b64)
+        ref_images.append(user_photo_bytes)
 
-            if not user_photo_b64:
-                raise ValueError("照片合拍模式需要上传照片")
-            # 解码 base64 照片
-            if user_photo_b64.startswith("data:"):
-                # 去掉 data:image/xxx;base64, 前缀
-                user_photo_b64 = user_photo_b64.split(",", 1)[-1]
-            ref_images.append(base64.b64decode(user_photo_b64))
+        # ===== 图片2：明星参考图（第二个传入） =====
+        artist_loaded = False
+        for url in (artist_ref_images or [])[:2]:
+            img_bytes = _load_image_bytes(url)
+            if img_bytes:
+                ref_images.append(img_bytes)
+                artist_loaded = True
+                break  # 只需要一张明星参考图
 
-            final_prompt = (
-                f"{template_prompt}，{rarity_tags.get(rarity, '')}。"
-                "请将明星参考图中的人物（图1）融入到用户提供的照片（图2）中，"
-                "保持明星五官与发型特征不变，自然地与用户同框合照。"
-                "保持用户照片的场景和构图，让明星自然地出现在画面中。"
-            )
-        else:
-            # ===== 虚拟形象模式（默认） =====
-            user_bytes = _load_image_bytes(user_avatar_url)
-            if user_bytes:
-                ref_images.append(user_bytes)
+        if not artist_loaded:
+            raise ValueError("合照生成失败：明星参考图无法加载")
 
-            for url in (artist_ref_images or [])[:3]:
-                img_bytes = _load_image_bytes(url)
-                if img_bytes:
-                    ref_images.append(img_bytes)
-
-            if len(ref_images) < 2:
-                raise ValueError(
-                    f"合照生成失败：有效参考图不足（{len(ref_images)}/2），"
-                    "请检查用户头像和明星参考图"
-                )
-
-            final_prompt = (
-                f"{template_prompt}，{rarity_tags.get(rarity, '')}。"
-                "请根据提供的用户个人形象（图1）和明星参考图（后续图片），"
-                "保持两人五官与发型特征，生成一张完美的双人唯美合照。"
-            )
+        # prompt 直接使用模板中按等级解析的内容（不额外拼接）
+        final_prompt = template_prompt
 
         logger.info(
-            f"Gemini 合照生成 mode={mode}, rarity={rarity}, "
-            f"图片数={len(ref_images)}"
+            f"Gemini 合照生成 rarity={rarity}, "
+            f"图片数={len(ref_images)}, prompt长度={len(final_prompt)}"
         )
 
         # 调用 Gemini API
@@ -324,3 +293,4 @@ class SeedreamService:
             "image_b64": data_uri,
             "status": "success",
         }
+

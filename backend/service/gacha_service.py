@@ -23,6 +23,59 @@ from service.seedream_service import SeedreamService
 
 logger = logging.getLogger(__name__)
 
+# 默认合拍 Prompt（按稀有度分级）
+# NOTE: 当模板没有自定义 prompt 时使用此默认值
+DEFAULT_PROMPTS = {
+    "N": (
+        "(masterpiece:1.3), (best quality:1.3), 8k, ultra realistic, photorealistic, "
+        "写实人像摄影，双人同框合照，"
+        "(严格保留图片1的面部核心特征、五官比例、原生穿搭、专属神态:1.4), "
+        "(严格保留图片2的面部核心特征、五官辨识度、标志性神态:1.4), "
+        "(100%还原图片1的原始场景、环境布局、光影色调、氛围质感:1.5), "
+        "明星人物自然融入图片1场景中，与用户人物形成自然的双人合照，"
+        "人物与场景光影完全统一，无穿帮，无违和感，面部清晰锐利，焦点准确"
+        "双人并排自然站立，无肢体接触，两人均正对镜头，表情自然温和，"
+        "画面干净稳定，构图均衡，无夸张动作，无多余元素，画面比例3：4"
+    ),
+    "R": (
+        "(masterpiece:1.3), (best quality:1.3), 8k, ultra realistic, photorealistic, "
+        "写实人像摄影，双人同框合照，"
+        "(严格保留图片1的面部核心特征、五官比例、原生穿搭、专属神态:1.4), "
+        "(严格保留图片2的面部核心特征、五官辨识度、标志性神态:1.4), "
+        "(100%还原图片1的原始场景、环境布局、光影色调、氛围质感:1.5), "
+        "图片2人物自然融入图片1场景中，与图片1人物形成自然的双人合照，"
+        "人物与场景光影完全统一，无穿帮，无违和感，面部清晰锐利，焦点准确"
+        "两人近距离自然靠近，身体微侧对视，温柔微笑，无肢体接触，"
+        "柔和自然的氛围感，画面光影过渡细腻，皮肤质感清透自然，"
+        "发丝细节清晰，构图松弛有故事感，画面比例3：4"
+    ),
+    "SR": (
+        "(masterpiece:1.3), (best quality:1.3), 8k, ultra realistic, photorealistic, "
+        "写实人像摄影，双人同框合照，"
+        "(严格保留图片1的面部核心特征、五官比例、原生穿搭、专属神态:1.4), "
+        "(严格保留图片2的面部核心特征、五官辨识度、标志性神态:1.4), "
+        "(100%还原图片1的原始场景、环境布局、光影色调、氛围质感:1.5), "
+        "图片2人物自然融入图片1场景中，与图片1人物形成自然的双人合照，"
+        "人物与场景光影完全统一，无穿帮，无违和感，面部清晰锐利，焦点准确"
+        "两人亲密友好互动，自然牵手/并肩搭肩/一起对着镜头比心，"
+        "表情自然甜笑，互动松弛不僵硬，柔和自然的氛围感，"
+        "画面光影过渡细腻，皮肤质感清透自然，发丝细节清晰，"
+        "构图松弛有故事感，画面比例3：4"
+    ),
+    "SSR": (
+        "(masterpiece:1.3), (best quality:1.3), 8k, ultra realistic, photorealistic, "
+        "写实人像摄影，双人同框合照，"
+        "(严格保留图片1的面部核心特征、五官比例、原生穿搭、专属神态:1.4), "
+        "(严格保留图片2的面部核心特征、五官辨识度、标志性神态:1.4), "
+        "(100%还原图片1的原始场景、环境布局、光影色调、氛围质感:1.5), "
+        "图片2人物自然融入图片1场景中，与图片1人物形成自然的双人合照，"
+        "人物与场景光影完全统一，无穿帮，无违和感，面部清晰锐利，焦点准确"
+        "两人温柔亲密互动，保持人物正脸，自然轻靠肩膀/温柔拥抱/额头轻贴，"
+        "神态放松温柔，高甜治愈的氛围感，画面光影过渡细腻，"
+        "皮肤质感清透自然，发丝细节清晰，构图松弛有故事感，画面比例3：4"
+    ),
+}
+
 # 定价常量
 SINGLE_DRAW_COST = 99
 TEN_DRAW_COST = 890
@@ -227,13 +280,6 @@ class GachaService:
         if card.get("user_id") != user_id:
             raise ValueError("无权操作此卡牌")
 
-        # avatar 模式：已有真实图片则跳过（picsum 占位图除外）
-        # photo 模式：每次都重新生成（用户可能换照片）
-        if mode == "avatar":
-            existing_url = card.get("image_url", "")
-            if existing_url and "picsum.photos" not in existing_url:
-                return card
-
         # 获取模板信息
         template_id = card.get("artist_id", "")
         template = TemplateRepository.get_by_id(template_id)
@@ -246,19 +292,26 @@ class GachaService:
             raise ValueError("用户不存在")
 
         rarity = card.get("rarity", "N")
+
+        # 优先使用模板自定义 prompt，否则使用默认 prompt
         template_prompt = template.get("template_prompt", "")
-        rarity_prompt = GachaService._parse_rarity_prompt(
-            template_prompt, rarity
-        )
+        if template_prompt and "||" in template_prompt:
+            rarity_prompt = GachaService._parse_rarity_prompt(
+                template_prompt, rarity
+            )
+        else:
+            # 使用默认 prompt
+            rarity_prompt = DEFAULT_PROMPTS.get(rarity, DEFAULT_PROMPTS["N"])
+
         artist_ref_images = template.get("artist_ref_images", [])
 
-        # 调用 AI 生图（双模式）
+        # 调用 AI 生图（仅照片合拍模式）
         fusion = SeedreamService.generate_fusion_image(
             user.get("avatar_url", ""),
             artist_ref_images,
             rarity_prompt,
             rarity,
-            mode=mode,
+            mode="photo",
             user_photo_b64=user_photo,
         )
 
@@ -271,3 +324,4 @@ class GachaService:
         updated_card = CardRepository.update(card_id, {"image_url": save_url})
 
         return updated_card or {**card, "image_url": save_url}
+

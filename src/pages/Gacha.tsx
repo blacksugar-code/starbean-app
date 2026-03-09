@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ChevronLeft, Gem, Loader2, Camera, Archive, Star, Upload, User } from 'lucide-react';
+import { Sparkles, ChevronLeft, Gem, Loader2, Camera, Archive, Star, Upload } from 'lucide-react';
 import { useStore, Card } from '../store/useStore';
 import * as api from '../services/api';
 import { API_BASE, resolveAssetUrl } from '../services/api';
@@ -44,7 +44,6 @@ export const Gacha: React.FC = () => {
   // 合照生成
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatedImageUrl, setGeneratedImageUrl] = useState('');
-  const [generateMode, setGenerateMode] = useState<'avatar' | 'photo'>('avatar');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -123,27 +122,7 @@ export const Gacha: React.FC = () => {
   };
 
   /**
-   * 「虚拟形象生成」按钮 — 直接调 API
-   */
-  const handleAvatarMode = async () => {
-    const target = getTargetCard();
-    if (!target) return;
-    setGenerateMode('avatar');
-    setStage('generating');
-    setGeneratingImage(true);
-    try {
-      const result = await api.generateCardImage(target.id, user.id, 'avatar');
-      setGeneratedImageUrl(result.image_url);
-    } catch (e: any) {
-      alert(e.message || '生成失败，请稍后重试');
-      setStage('reveal');
-    } finally {
-      setGeneratingImage(false);
-    }
-  };
-
-  /**
-   * 「在我的照片里合照」按钮 — 先触发文件选择
+   * 「上传照片合拍」按钮 — 触发文件选择
    */
   const handlePhotoMode = () => {
     fileInputRef.current?.click();
@@ -158,7 +137,6 @@ export const Gacha: React.FC = () => {
     const target = getTargetCard();
     if (!target) return;
 
-    setGenerateMode('photo');
     setStage('generating');
     setGeneratingImage(true);
 
@@ -351,27 +329,15 @@ export const Gacha: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1 }}
             >
-              {/* 模式 1：虚拟形象生成 */}
-              <button
-                onClick={handleAvatarMode}
-                className={`w-full py-4 rounded-2xl font-bold text-base flex items-center gap-3 px-5 bg-gradient-to-r ${rarityConfig.gradient} text-white shadow-xl active:scale-95 transition-transform`}
-              >
-                <User className="w-6 h-6 shrink-0" />
-                <div className="text-left">
-                  <p>虚拟形象生成</p>
-                  <p className="text-[10px] font-normal opacity-80">官方场景 · 更有代入感</p>
-                </div>
-              </button>
-
-              {/* 模式 2：在我的照片里合照 */}
+              {/* 上传照片合拍 */}
               <button
                 onClick={handlePhotoMode}
-                className="w-full py-4 rounded-2xl font-bold text-base flex items-center gap-3 px-5 bg-white/10 border border-white/20 text-white active:scale-95 transition-transform"
+                className={`w-full py-4 rounded-2xl font-bold text-base flex items-center gap-3 px-5 bg-gradient-to-r ${rarityConfig.gradient} text-white shadow-xl active:scale-95 transition-transform`}
               >
                 <Upload className="w-6 h-6 shrink-0" />
                 <div className="text-left">
-                  <p>在我的照片里合照</p>
-                  <p className="text-[10px] font-normal opacity-60">上传照片 · 更真实可控</p>
+                  <p>上传照片合拍</p>
+                  <p className="text-[10px] font-normal opacity-80">上传你的照片 · 和明星同框</p>
                 </div>
               </button>
 

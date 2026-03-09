@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { BottomNav } from '../components/BottomNav';
-import { Search, ChevronRight, Image as ImageIcon, Loader2, Camera, Sparkles, User, Upload, X, Download, Share2 } from 'lucide-react';
+import { Search, ChevronRight, Image as ImageIcon, Loader2, Camera, Sparkles, Upload, X, Download, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import * as api from '../services/api';
 import { API_BASE, resolveAssetUrl } from '../services/api';
@@ -55,49 +55,19 @@ export const Collection: React.FC = () => {
   const [previewCard, setPreviewCard] = useState<CardData | null>(null);
   const [saveToast, setSaveToast] = useState(false);
 
-  // 模式选择弹窗
-  const [showModeModal, setShowModeModal] = useState(false);
+  // 模式选择
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /**
-   * 点击待生成卡牌 → 弹出模式选择
+   * 点击待生成卡牌 → 直接打开文件选择（仅照片合拍模式）
    */
   const handleCardClick = useCallback((card: CardData) => {
     if (generatingCardId) return;
     setSelectedCard(card);
-    setShowModeModal(true);
+    // 直接触发文件选择器
+    setTimeout(() => fileInputRef.current?.click(), 50);
   }, [generatingCardId]);
-
-  /**
-   * 虚拟形象模式生成
-   */
-  const handleAvatarGenerate = useCallback(async () => {
-    if (!selectedCard || generatingCardId) return;
-    setShowModeModal(false);
-    setGeneratingCardId(selectedCard.id);
-    try {
-      const result = await api.generateCardImage(selectedCard.id, user.id, 'avatar');
-      setCards((prev) =>
-        prev.map((c) =>
-          c.id === selectedCard.id ? { ...c, image_url: result.image_url } : c
-        )
-      );
-    } catch (e: any) {
-      alert(e.message || '生成合照失败，请重试');
-    } finally {
-      setGeneratingCardId(null);
-      setSelectedCard(null);
-    }
-  }, [selectedCard, generatingCardId, user.id]);
-
-  /**
-   * 照片合拍模式 — 触发文件选择
-   */
-  const handlePhotoGenerate = useCallback(() => {
-    setShowModeModal(false);
-    fileInputRef.current?.click();
-  }, []);
 
   /**
    * 用户选择照片后 → 调 API
@@ -383,45 +353,6 @@ export const Collection: React.FC = () => {
           );
         })}
       </div>
-
-      {/* 模式选择弹窗 */}
-      {showModeModal && selectedCard && (
-        <div className="fixed inset-0 z-[100] bg-black/60 flex items-end justify-center" onClick={() => setShowModeModal(false)}>
-          <div
-            className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-t-3xl p-6 pb-10 space-y-3"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">选择合照方式</h3>
-              <button onClick={() => setShowModeModal(false)}>
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
-            </div>
-
-            <button
-              onClick={handleAvatarGenerate}
-              className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white active:scale-[0.98] transition-transform"
-            >
-              <User className="w-8 h-8 shrink-0" />
-              <div className="text-left">
-                <p className="font-bold">虚拟形象生成</p>
-                <p className="text-xs opacity-80">官方场景 · 更有代入感</p>
-              </div>
-            </button>
-
-            <button
-              onClick={handlePhotoGenerate}
-              className="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-white active:scale-[0.98] transition-transform"
-            >
-              <Upload className="w-8 h-8 shrink-0 text-pink-500" />
-              <div className="text-left">
-                <p className="font-bold">在我的照片里合照</p>
-                <p className="text-xs text-slate-400">上传照片 · 更真实可控</p>
-              </div>
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* 卡牌全屏预览弹窗 */}
       {previewCard && (
