@@ -188,7 +188,7 @@ export const Gacha: React.FC = () => {
       )}
       <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900" />
 
-      {/* ===== 抽卡动画阶段 ===== */}
+      {/* ===== 抽卡动画阶段（统一灰色悬念） ===== */}
       <AnimatePresence>
         {stage === 'animating' && (
           <motion.div
@@ -198,36 +198,78 @@ export const Gacha: React.FC = () => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center overflow-hidden"
           >
-            {/* 粒子爆发效果 */}
-            {Array.from({ length: 30 }).map((_, i) => (
+            {/* 灰色粒子漂浮 */}
+            {Array.from({ length: 40 }).map((_, i) => (
               <motion.div
                 key={i}
-                className={`absolute w-2 h-2 rounded-full bg-gradient-to-r ${rarityConfig.gradient}`}
-                initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
-                animate={{
-                  x: (Math.random() - 0.5) * 600,
-                  y: (Math.random() - 0.5) * 800,
-                  scale: [0, 1.5, 0],
-                  opacity: [1, 1, 0],
+                className="absolute w-1 h-1 rounded-full bg-white/20"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
                 }}
-                transition={{ duration: 2, delay: 0.5 + Math.random() * 1, ease: 'easeOut' }}
+                animate={{
+                  y: [0, -200],
+                  opacity: [0, 0.6, 0],
+                  scale: [0, 1.5, 0],
+                }}
+                transition={{
+                  duration: 2 + Math.random() * 2,
+                  delay: Math.random() * 2,
+                  repeat: Infinity,
+                }}
               />
             ))}
-            {/* 中心能量球 */}
+            {/* 灰色光线射线 */}
+            {Array.from({ length: 12 }).map((_, i) => (
+              <motion.div
+                key={`ray-${i}`}
+                className="absolute w-0.5 bg-gradient-to-t from-transparent via-white/10 to-transparent"
+                style={{
+                  height: '200px',
+                  left: '50%',
+                  top: '50%',
+                  transformOrigin: 'bottom center',
+                  rotate: `${i * 30}deg`,
+                }}
+                animate={{ opacity: [0.1, 0.3, 0.1], scaleY: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.5, delay: i * 0.1, repeat: Infinity }}
+              />
+            ))}
+            {/* 灰色悬念能量球 */}
             <motion.div
-              className={`w-32 h-32 rounded-full bg-gradient-to-br ${rarityConfig.gradient} ${rarityConfig.glow}`}
+              className="w-36 h-36 rounded-full bg-gradient-to-br from-zinc-500 via-zinc-600 to-zinc-700 shadow-[0_0_60px_rgba(161,161,170,0.3)]"
               initial={{ scale: 0, rotate: 0 }}
               animate={{
                 scale: [0, 1.5, 0.8, 1.2, 1],
                 rotate: [0, 180, 360],
               }}
               transition={{ duration: 2.5, ease: 'easeInOut' }}
+            >
+              {/* 内部闪烁问号 */}
+              <motion.div
+                className="w-full h-full flex items-center justify-center"
+                animate={{ opacity: [0.3, 1, 0.3] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                <span className="text-5xl font-black text-white/40">?</span>
+              </motion.div>
+            </motion.div>
+            {/* 外环脉冲 */}
+            <motion.div
+              className="absolute w-40 h-40 rounded-full border-2 border-white/10"
+              animate={{ scale: [1, 2.5], opacity: [0.4, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+            <motion.div
+              className="absolute w-40 h-40 rounded-full border border-white/5"
+              animate={{ scale: [1, 3], opacity: [0.3, 0] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
             />
             <motion.p
-              className="mt-8 text-xl font-bold text-white/80"
+              className="mt-10 text-xl font-bold text-white/50 tracking-widest"
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
+              animate={{ opacity: [0.4, 0.8, 0.4], y: 0 }}
+              transition={{ duration: 2, repeat: Infinity }}
             >
               命运正在降临...
             </motion.p>
@@ -235,7 +277,7 @@ export const Gacha: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* ===== 等级揭示阶段 ===== */}
+      {/* ===== 等级揭示阶段（炫彩爆炸） ===== */}
       <AnimatePresence>
         {stage === 'reveal' && (
           <motion.div
@@ -244,11 +286,45 @@ export const Gacha: React.FC = () => {
             animate={{ opacity: 1 }}
             className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center overflow-hidden"
           >
-            {/* 背景粒子 */}
-            {Array.from({ length: rarityConfig.particles }).map((_, i) => (
+            {/* 背景色彩爆炸效果 */}
+            <motion.div
+              className={`absolute inset-0 bg-gradient-to-br ${rarityConfig.gradient} opacity-0`}
+              animate={{ opacity: [0, 0.15, 0.08] }}
+              transition={{ duration: 1 }}
+            />
+
+            {/* 中心光爆 */}
+            <motion.div
+              className={`absolute w-96 h-96 rounded-full ${rarityConfig.glow}`}
+              style={{ background: `radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)` }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [0, 3, 2], opacity: [0, 0.8, 0.3] }}
+              transition={{ duration: 0.8 }}
+            />
+
+            {/* 彩色光线射线爆炸 */}
+            {Array.from({ length: 24 }).map((_, i) => (
+              <motion.div
+                key={`revray-${i}`}
+                className={`absolute w-1 bg-gradient-to-t from-transparent via-current to-transparent ${rarityConfig.text}`}
+                style={{
+                  height: '300px',
+                  left: '50%',
+                  top: '50%',
+                  transformOrigin: 'bottom center',
+                  rotate: `${i * 15}deg`,
+                }}
+                initial={{ scaleY: 0, opacity: 0 }}
+                animate={{ scaleY: [0, 1.5, 0.8], opacity: [0, 0.6, 0.2] }}
+                transition={{ duration: 1.2, delay: i * 0.02 }}
+              />
+            ))}
+
+            {/* 背景 emoji 粒子（数量翻倍） */}
+            {Array.from({ length: rarityConfig.particles * 2 }).map((_, i) => (
               <motion.div
                 key={i}
-                className={`absolute text-lg`}
+                className="absolute text-xl"
                 style={{
                   left: `${Math.random() * 100}%`,
                   top: `${Math.random() * 100}%`,
@@ -256,8 +332,10 @@ export const Gacha: React.FC = () => {
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{
                   opacity: [0, 1, 0],
-                  scale: [0, 1, 0.5],
-                  y: -100,
+                  scale: [0, 1.5, 0.5],
+                  y: -150,
+                  x: (Math.random() - 0.5) * 100,
+                  rotate: Math.random() * 360,
                 }}
                 transition={{
                   duration: 2 + Math.random() * 2,
@@ -270,19 +348,45 @@ export const Gacha: React.FC = () => {
               </motion.div>
             ))}
 
+            {/* 外环脉冲（彩色） */}
+            {[0, 0.4, 0.8].map((delay, i) => (
+              <motion.div
+                key={`pulse-${i}`}
+                className={`absolute w-32 h-32 rounded-full border-2`}
+                style={{ borderColor: maxRarity === 'SSR' ? '#fbbf24' : maxRarity === 'SR' ? '#a78bfa' : maxRarity === 'R' ? '#60a5fa' : '#94a3b8' }}
+                animate={{ scale: [1, 4], opacity: [0.6, 0] }}
+                transition={{ duration: 2, repeat: Infinity, delay }}
+              />
+            ))}
+
             {/* 等级揭示卡片 */}
             <motion.div
               initial={{ scale: 0, rotateY: 180 }}
               animate={{ scale: 1, rotateY: 0 }}
-              transition={{ type: 'spring', damping: 15, stiffness: 100 }}
+              transition={{ type: 'spring', damping: 12, stiffness: 100 }}
               className={`w-64 h-80 rounded-3xl bg-gradient-to-br ${rarityConfig.gradient} ${rarityConfig.glow} flex flex-col items-center justify-center relative`}
             >
-              {/* SSR 专属光环 */}
+              {/* SSR 专属金光脉冲 */}
               {maxRarity === 'SSR' && (
+                <>
+                  <motion.div
+                    className="absolute inset-0 rounded-3xl border-4 border-yellow-300/60"
+                    animate={{ scale: [1, 1.05, 1], opacity: [0.6, 1, 0.6] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  />
+                  <motion.div
+                    className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-yellow-400/20 to-orange-500/20"
+                    animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.08, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  />
+                </>
+              )}
+              {/* SR 专属紫光 */}
+              {maxRarity === 'SR' && (
                 <motion.div
-                  className="absolute inset-0 rounded-3xl border-4 border-yellow-300/60"
-                  animate={{ scale: [1, 1.05, 1], opacity: [0.6, 1, 0.6] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-purple-500/15 to-indigo-500/15"
+                  animate={{ opacity: [0.1, 0.4, 0.1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
                 />
               )}
               <motion.p
