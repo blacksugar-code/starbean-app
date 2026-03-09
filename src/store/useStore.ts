@@ -1,7 +1,44 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import * as api from '../services/api';
 
+/**
+ * 启动时自动清理 localStorage 中过大的旧数据
+ * 防止 QuotaExceededError 导致任何 setItem 调用都失败
+ */
+try {
+  const raw = localStorage.getItem('starbean-auth');
+  if (raw && raw.length > 500_000) {
+    // 旧数据超过 500KB（可能含 base64 图片），直接清除
+    localStorage.removeItem('starbean-auth');
+    console.warn('[StarBean] 已清理过大的 localStorage 数据');
+  }
+} catch {
+  // localStorage 已满，强制清空
+  localStorage.removeItem('starbean-auth');
+  console.warn('[StarBean] localStorage 异常，已强制清理');
+}
+
+/**
+ * 安全的 storage 封装，setItem 失败时自动清理并重试
+ */
+const safeStorage = createJSONStorage(() => ({
+  getItem: (name: string) => localStorage.getItem(name),
+  setItem: (name: string, value: string) => {
+    try {
+      localStorage.setItem(name, value);
+    } catch {
+      // QuotaExceeded：清空旧数据后重试
+      localStorage.removeItem(name);
+      try {
+        localStorage.setItem(name, value);
+      } catch {
+        console.error('[StarBean] localStorage 写入失败，数据未持久化');
+      }
+    }
+  },
+  removeItem: (name: string) => localStorage.removeItem(name),
+}));
 export type Rarity = 'N' | 'R' | 'SR' | 'SSR';
 
 export interface Card {
@@ -360,6 +397,7 @@ export const useStore = create<StoreState>()(
     {
       // NOTE: persist key 改为 starbean-auth，api.ts 的 getAuthToken 需要与此一致
       name: 'starbean-auth',
+      storage: safeStorage,
       // NOTE: 只持久化认证信息和精简用户数据，不存 collection（含大量 base64 图片会超 localStorage 5MB 限制）
       partialize: (state) => ({
         token: state.token,
