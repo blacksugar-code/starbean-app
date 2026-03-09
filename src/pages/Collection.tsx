@@ -327,7 +327,9 @@ export const Collection: React.FC = () => {
                     return (
                       <div
                         key={card.id}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('Card clicked:', card.name, 'hasImage:', hasImage, 'image_url:', card.image_url);
                           if (hasImage) {
                             setPreviewCard(card);
                           } else if (!isGenerating) {

@@ -98,8 +98,8 @@ export const TemplateDetails: React.FC = () => {
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {template.artist_ref_images.map((img, i) => (
-                <div key={i} className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-slate-100 dark:bg-zinc-800">
-                  <img src={img} alt={`Ref ${i + 1}`} className="w-full h-full object-cover" />
+                <div key={i} className="w-16 h-16 rounded-full overflow-hidden shrink-0 bg-slate-100 dark:bg-zinc-800 border-2 border-pink-200 dark:border-pink-800">
+                  <img src={resolveAssetUrl(img)} alt={template.artist_name} className="w-full h-full object-cover" />
                 </div>
               ))}
             </div>
@@ -127,22 +127,6 @@ export const TemplateDetails: React.FC = () => {
           </div>
         </div>
 
-        {/* Card Pool Preview */}
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-bold text-base text-slate-800 dark:text-white">卡池预览</h3>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="aspect-[3/4] rounded-lg bg-slate-200 dark:bg-zinc-800 overflow-hidden relative group">
-                <img src={`https://picsum.photos/seed/card_${id}_${i}/300/400`} alt="Card" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                {i === 0 && <span className="absolute top-1 right-1 bg-yellow-400 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm">SSR</span>}
-                {i === 1 && <span className="absolute top-1 right-1 bg-purple-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm">SR</span>}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Bottom Action Bar - 使用后端价格 */}
