@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  # ===== 前端 (Nginx + 静态文件) =====
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # ===== 后端 (FastAPI) =====
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ARK_API_KEY=${ARK_API_KEY}
+    volumes:
+      # 持久化上传文件和数据
+      - uploads_data:/app/uploads
+      - ./backend/data:/app/data
+    restart: unless-stopped
+
+volumes:
+  uploads_data:

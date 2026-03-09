@@ -1,0 +1,5 @@
+{
+  "name": "StarBean",
+  "description": "An AI photo gacha mini-program featuring user and artist digital avatar fusion.",
+  "requestFramePermissions": ["camera"]
+}

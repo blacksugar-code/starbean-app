@@ -1,0 +1,16 @@
+[
+  {
+    "id": "artist-jay",
+    "name": "周杰伦",
+    "avatar_url": "https://picsum.photos/seed/jay/200",
+    "description": "华语乐坛天王，代表作《双截棍》《晴天》《稻香》等",
+    "created_at": "2026-03-07T00:00:00"
+  },
+  {
+    "id": "11b74ae9-f12f-475a-918c-5290417d26fc",
+    "name": "田曦薇",
+    "avatar_url": "/api/uploads/473beb74-7df3-4c4c-837b-bf6f6add4b23.jpg",
+    "description": "一个大美女",
+    "created_at": "2026-03-08T23:18:53.228635"
+  }
+]
