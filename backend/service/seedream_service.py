@@ -1,26 +1,23 @@
 """
-豆包 SeedReam 5.0 AI 生图服务层
-通过火山方舟 OpenAI 兼容接口进行数字形象生成和合照生成
+AI 生图服务层 — 基于 Google Gemini Imagen API
+提供：数字形象生成 + 合照融合生成
 
-NOTE: 统一使用 httpx 直接调用火山方舟接口
+NOTE: 保持 SeedreamService 类名和方法签名不变，方便其他模块无感切换
 """
 import os
 import uuid
 import base64
 import logging
-import httpx
+import io
 from typing import Dict, Any, List, Optional
 from pathlib import Path
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
 # 上传文件保存目录
 UPLOADS_DIR = Path(__file__).parent.parent / "uploads"
 UPLOADS_DIR.mkdir(exist_ok=True)
-
-# 火山方舟 API 配置
-ARK_BASE_URL = "https://ark.cn-beijing.volces.com/api/v3"
-ARK_MODEL = "doubao-seedream-5-0-260128"
 
 # 数字形象生成提示词
 AVATAR_GENERATION_PROMPT = (
@@ -30,149 +27,136 @@ AVATAR_GENERATION_PROMPT = (
 )
 
 
-def _get_ark_api_key() -> str:
+def _get_gemini_client():
     """
-    获取火山方舟 API Key
-    未配置时直接抛异常，不降级
+    获取 Google Gemini 客户端
+    使用 google-genai SDK
     """
-    api_key = os.getenv("ARK_API_KEY", "")
+    from google import genai
+
+    api_key = os.getenv("GEMINI_API_KEY", "")
     if not api_key:
-        raise ValueError("ARK_API_KEY 未配置，无法调用 AI 生图服务")
-    return api_key
+        raise ValueError("GEMINI_API_KEY 未配置，无法调用 AI 生图服务")
+
+    client = genai.Client(api_key=api_key)
+    return client
 
 
-def _image_path_to_base64(path: str) -> str:
-    """将本地图片路径转为 base64 data URI，压缩到合理尺寸"""
-    from PIL import Image
-    import io
+def _load_image_bytes(path_or_url: str) -> Optional[bytes]:
+    """
+    从本地路径或 URL 加载图片字节数据
+    自动识别 /uploads/ 路径和网络 URL
+    """
+    import httpx
 
-    try:
-        img = Image.open(path)
-        img = img.convert("RGB")
-        img.thumbnail((768, 768))
-        buffer = io.BytesIO()
-        img.save(buffer, format="JPEG", quality=85)
-        img_b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-        return f"data:image/jpeg;base64,{img_b64}"
-    except Exception:
-        # 降级：直接读取文件
-        with open(path, "rb") as f:
-            img_b64 = base64.b64encode(f.read()).decode("utf-8")
-        return f"data:image/jpeg;base64,{img_b64}"
-
-
-def _url_to_base64(url: str, max_size: int = 768) -> Optional[str]:
-    """将本地路径或网络 URL 的图片转码为 data URI Base64"""
-    if not url:
+    if not path_or_url:
         return None
 
     try:
-        from PIL import Image
-        import io
-
-        img = None
-        if url.startswith("/api/uploads/") or url.startswith("/uploads/"):
-            filename = url.split("/")[-1]
+        if path_or_url.startswith("/api/uploads/") or path_or_url.startswith("/uploads/"):
+            filename = path_or_url.split("/")[-1]
             local_path = UPLOADS_DIR / filename
             if local_path.exists():
-                img = Image.open(local_path)
-        elif url.startswith("http://") or url.startswith("https://"):
-            resp = httpx.get(url, timeout=10.0)
+                return local_path.read_bytes()
+        elif path_or_url.startswith("http://") or path_or_url.startswith("https://"):
+            resp = httpx.get(path_or_url, timeout=15.0)
             if resp.status_code == 200:
-                img = Image.open(io.BytesIO(resp.content))
+                return resp.content
+        elif os.path.exists(path_or_url):
+            with open(path_or_url, "rb") as f:
+                return f.read()
+    except Exception as e:
+        logger.warning(f"加载图片失败 [{path_or_url}]: {e}")
 
-        if not img:
-            return None
+    return None
 
+
+def _compress_image(img_bytes: bytes, max_size: int = 768) -> bytes:
+    """压缩图片到合理尺寸"""
+    try:
+        img = Image.open(io.BytesIO(img_bytes))
         img = img.convert("RGB")
         img.thumbnail((max_size, max_size))
         buffer = io.BytesIO()
         img.save(buffer, format="JPEG", quality=85)
-        img_b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-        return f"data:image/jpeg;base64,{img_b64}"
-    except Exception as e:
-        logger.warning(f"URL 转换 Base64 失败 [{url}]: {e}")
-        return None
+        return buffer.getvalue()
+    except Exception:
+        return img_bytes
 
 
-def _call_seedream_api(
+def _save_image_bytes(img_bytes: bytes, filename: str) -> str:
+    """将图片字节保存到 uploads 目录，返回本地 URL"""
+    save_path = UPLOADS_DIR / filename
+    with open(save_path, "wb") as f:
+        f.write(img_bytes)
+    logger.info(f"图片已保存: {filename}")
+    return f"/uploads/{filename}"
+
+
+def _call_gemini_generate(
     prompt: str,
-    images: List[str],
-    api_key: str,
-) -> Dict[str, Any]:
+    reference_images: List[bytes],
+) -> bytes:
     """
-    统一调用豆包 SeedReam 5.0 API
+    调用 Gemini API 生成图片
+
+    使用 gemini-2.0-flash-exp 模型进行多模态图片生成
+    传入参考图片 + 文字 prompt，返回生成的图片字节
 
     @param prompt 生成提示词
-    @param images base64 data URI 图片列表
-    @param api_key 火山方舟 API Key
-    @returns API 响应 JSON
+    @param reference_images 参考图片字节列表
+    @returns 生成的图片字节数据
     """
-    request_body: Dict[str, Any] = {
-        "model": ARK_MODEL,
-        "prompt": prompt,
-        "image": images,
-        "response_format": "url",
-        "size": "2K",
-        "stream": False,
-        "n": 1,
-    }
+    from google import genai
+    from google.genai import types
 
-    logger.info(f"调用 SeedReam API，图片数={len(images)}，prompt长度={len(prompt)}，prompt={prompt[:80]}...")
+    client = _get_gemini_client()
 
-    response = httpx.post(
-        f"{ARK_BASE_URL}/images/generations",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json=request_body,
-        timeout=120.0,
+    # 构建多模态内容：先放参考图片，再放文字 prompt
+    parts = []
+    for idx, img_bytes in enumerate(reference_images):
+        compressed = _compress_image(img_bytes)
+        parts.append(
+            types.Part.from_bytes(
+                data=compressed,
+                mime_type="image/jpeg",
+            )
+        )
+    parts.append(types.Part.from_text(text=prompt))
+
+    logger.info(
+        f"调用 Gemini API，图片数={len(reference_images)}，"
+        f"prompt长度={len(prompt)}，prompt={prompt[:80]}..."
     )
 
-    if response.status_code != 200:
-        error_detail = response.text[:1000]
-        logger.error(
-            f"SeedReam API 错误 {response.status_code}: {error_detail}\n"
-            f"请求 prompt: {prompt[:200]}\n"
-            f"图片数: {len(images)}"
-        )
-        # 尝试解析错误详情返回给前端
-        try:
-            err_json = response.json()
-            err_msg = err_json.get("error", {}).get("message", error_detail[:200])
-        except Exception:
-            err_msg = error_detail[:200]
-        raise ValueError(f"AI 生图失败: {err_msg}")
-
-    result = response.json()
-    data_list = result.get("data", [])
-    if not data_list:
-        raise ValueError("SeedReam API 未返回图片数据")
-
-    return data_list[0]
-
-
-def _save_remote_image(image_url: str, filename: str) -> str:
-    """下载远程图片保存到本地 uploads 目录，返回本地路径"""
     try:
-        img_resp = httpx.get(image_url, timeout=30.0)
-        img_resp.raise_for_status()
-        save_path = UPLOADS_DIR / filename
-        with open(save_path, "wb") as f:
-            f.write(img_resp.content)
-        logger.info(f"图片已保存到本地: {filename}")
-        return f"/uploads/{filename}"
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            contents=parts,
+            config=types.GenerateContentConfig(
+                response_modalities=["TEXT", "IMAGE"],
+            ),
+        )
     except Exception as e:
-        logger.warning(f"下载远程图片失败，直接使用 URL: {e}")
-        return image_url
+        logger.error(f"Gemini API 调用失败: {e}")
+        raise ValueError(f"AI 生图失败: {e}")
+
+    # 从响应中提取图片
+    if response.candidates:
+        for candidate in response.candidates:
+            if candidate.content and candidate.content.parts:
+                for part in candidate.content.parts:
+                    if part.inline_data and part.inline_data.mime_type and part.inline_data.mime_type.startswith("image/"):
+                        return part.inline_data.data
+
+    raise ValueError("Gemini API 未返回图片数据，请检查 prompt 或重试")
 
 
 class SeedreamService:
     """
-    豆包 SeedReam 5.0 AI 生图服务
+    AI 生图服务（已切换为 Google Gemini Imagen）
+    保持原有接口签名，方便其他模块无感切换
     提供：数字形象生成 + 合照融合生成
-    统一使用火山方舟 API，不做 Mock 降级
     """
 
     @staticmethod
@@ -181,53 +165,37 @@ class SeedreamService:
     ) -> Dict[str, Any]:
         """
         生成用户数字形象
-        调用豆包 SeedReam API，基于用户上传的照片生成 AI 形象
+        基于用户上传的照片，调用 Gemini API 生成 AI 形象
 
         @param photo_paths 用户上传的照片文件路径列表
         @param style 生成风格（预留扩展）
         @returns 包含 id, image_url, status 的字典
         """
-        api_key = _get_ark_api_key()
-
-        # 将照片转为 base64
-        image_list: List[str] = []
+        # 加载参考照片
+        ref_images: List[bytes] = []
         for path in photo_paths:
             try:
-                b64 = _image_path_to_base64(path)
-                image_list.append(b64)
+                img_bytes = _load_image_bytes(path)
+                if img_bytes:
+                    ref_images.append(img_bytes)
             except Exception as e:
                 logger.warning(f"无法读取照片 {path}: {e}")
                 continue
 
-        if not image_list:
+        if not ref_images:
             raise ValueError("没有可用的参考照片")
 
-        # 调用统一 API
-        result = _call_seedream_api(
+        # 调用 Gemini 生成
+        result_bytes = _call_gemini_generate(
             prompt=AVATAR_GENERATION_PROMPT,
-            images=image_list,
-            api_key=api_key,
+            reference_images=ref_images,
         )
 
         avatar_id = str(uuid.uuid4())
+        filename = f"avatar_{avatar_id}.png"
+        local_url = _save_image_bytes(result_bytes, filename)
 
-        # 解析响应
-        image_url = result.get("url", "")
-        if image_url:
-            local_url = _save_remote_image(image_url, f"avatar_{avatar_id}.png")
-            return {"id": avatar_id, "image_url": local_url, "status": "success"}
-
-        # 备用：b64_json
-        image_b64 = result.get("b64_json", "")
-        if image_b64:
-            image_data = base64.b64decode(image_b64)
-            filename = f"avatar_{avatar_id}.png"
-            save_path = UPLOADS_DIR / filename
-            with open(save_path, "wb") as f:
-                f.write(image_data)
-            return {"id": avatar_id, "image_url": f"/uploads/{filename}", "status": "success"}
-
-        raise ValueError("SeedReam API 响应中无图片数据")
+        return {"id": avatar_id, "image_url": local_url, "status": "success"}
 
     @staticmethod
     def generate_fusion_image(
@@ -242,12 +210,7 @@ class SeedreamService:
         生成合照（双模式）
 
         模式 avatar — 用户虚拟形象 + 明星参考图 → 合照
-          图片顺序: [用户虚拟形象, 明星参考图...]
-          prompt: 根据用户形象和明星形象生成双人合照
-
         模式 photo — 明星参考图 + 用户上传照片 → 将明星融入用户照片
-          图片顺序: [明星参考图, 用户上传照片]
-          prompt: 将明星人物融入到用户提供的照片场景中
 
         @param user_avatar_url 用户虚拟形象 URL（avatar 模式用）
         @param artist_ref_images 艺人参考图 URL 列表
@@ -257,7 +220,6 @@ class SeedreamService:
         @param user_photo_b64 用户上传的照片 base64（photo 模式用）
         @returns 包含 id, image_url, status 的字典
         """
-        api_key = _get_ark_api_key()
         fusion_id = str(uuid.uuid4())
 
         # 稀有度画质增强标签
@@ -268,27 +230,25 @@ class SeedreamService:
             "SSR": "大师级摄影, 极致细节, 特写构图, 史诗级画面, 16K超清",
         }
 
-        b64_images: List[str] = []
+        ref_images: List[bytes] = []
 
         if mode == "photo":
             # ===== 照片合拍模式 =====
-            # 图片顺序：[明星参考图, 用户上传照片]
-            # NOTE: 明星参考图在前，让 AI 先学习明星特征
             for url in (artist_ref_images or [])[:2]:
-                b64 = _url_to_base64(url)
-                if b64:
-                    b64_images.append(b64)
+                img_bytes = _load_image_bytes(url)
+                if img_bytes:
+                    ref_images.append(img_bytes)
 
-            if not b64_images:
+            if not ref_images:
                 raise ValueError("合照生成失败：明星参考图无法加载")
 
-            # 用户上传的照片
             if not user_photo_b64:
                 raise ValueError("照片合拍模式需要上传照片")
-            # 如果已经是 data URI 格式直接用，否则加前缀
-            if not user_photo_b64.startswith("data:"):
-                user_photo_b64 = f"data:image/jpeg;base64,{user_photo_b64}"
-            b64_images.append(user_photo_b64)
+            # 解码 base64 照片
+            if user_photo_b64.startswith("data:"):
+                # 去掉 data:image/xxx;base64, 前缀
+                user_photo_b64 = user_photo_b64.split(",", 1)[-1]
+            ref_images.append(base64.b64decode(user_photo_b64))
 
             final_prompt = (
                 f"{template_prompt}，{rarity_tags.get(rarity, '')}。"
@@ -298,19 +258,18 @@ class SeedreamService:
             )
         else:
             # ===== 虚拟形象模式（默认） =====
-            # 图片顺序：[用户虚拟形象, 明星参考图...]
-            user_b64 = _url_to_base64(user_avatar_url)
-            if user_b64:
-                b64_images.append(user_b64)
+            user_bytes = _load_image_bytes(user_avatar_url)
+            if user_bytes:
+                ref_images.append(user_bytes)
 
             for url in (artist_ref_images or [])[:3]:
-                b64 = _url_to_base64(url)
-                if b64:
-                    b64_images.append(b64)
+                img_bytes = _load_image_bytes(url)
+                if img_bytes:
+                    ref_images.append(img_bytes)
 
-            if len(b64_images) < 2:
+            if len(ref_images) < 2:
                 raise ValueError(
-                    f"合照生成失败：有效参考图不足（{len(b64_images)}/2），"
+                    f"合照生成失败：有效参考图不足（{len(ref_images)}/2），"
                     "请检查用户头像和明星参考图"
                 )
 
@@ -321,28 +280,26 @@ class SeedreamService:
             )
 
         logger.info(
-            f"SeedReam 合照生成 mode={mode}, rarity={rarity}, "
-            f"图片数={len(b64_images)}"
+            f"Gemini 合照生成 mode={mode}, rarity={rarity}, "
+            f"图片数={len(ref_images)}"
         )
 
-        # 调用统一 API
+        # 调用 Gemini API
         try:
-            result = _call_seedream_api(
+            result_bytes = _call_gemini_generate(
                 prompt=final_prompt,
-                images=b64_images,
-                api_key=api_key,
+                reference_images=ref_images,
             )
-        except httpx.TimeoutException:
-            raise ValueError("AI 生图超时，请稍后重试")
+        except Exception as e:
+            if "timeout" in str(e).lower():
+                raise ValueError("AI 生图超时，请稍后重试")
+            raise
 
-        # 解析响应
-        image_url = result.get("url", "")
-        if image_url:
-            local_url = _save_remote_image(
-                image_url, f"fusion_{fusion_id}.png"
-            )
-            if local_url.startswith("/uploads/"):
-                local_url = f"/api{local_url}"
-            return {"id": fusion_id, "image_url": local_url, "status": "success"}
+        # 保存到本地
+        filename = f"fusion_{fusion_id}.png"
+        local_url = _save_image_bytes(result_bytes, filename)
+        # NOTE: 合照保存后 URL 加 /api 前缀用于前端访问
+        if local_url.startswith("/uploads/"):
+            local_url = f"/api{local_url}"
 
-        raise ValueError("AI 生图返回的图片 URL 为空")
+        return {"id": fusion_id, "image_url": local_url, "status": "success"}
