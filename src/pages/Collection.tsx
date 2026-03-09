@@ -131,7 +131,7 @@ export const Collection: React.FC = () => {
     const fetchData = async () => {
       try {
         const [cardsRes, templatesRes] = await Promise.all([
-          fetch(`{API_BASE}/gacha/cards/${user.id}`).then((r) => r.json()),
+          fetch(`${API_BASE}/gacha/cards/${user.id}`).then((r) => r.json()),
           fetch(API_BASE + '/templates').then((r) => r.json()),
         ]);
 

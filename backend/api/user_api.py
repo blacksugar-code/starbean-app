@@ -149,3 +149,46 @@ async def recharge(user_id: str, request: CurrencyUpdateRequest):
     if not user:
         raise HTTPException(status_code=400, detail="充值失败")
     return {"star_beans": user.get("star_beans", 0)}
+
+
+@router.get("/users/{user_id}/follows")
+async def get_follows(user_id: str):
+    """获取用户关注的艺人列表"""
+    user = UserService.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return {"followed_artists": user.get("followed_artists", [])}
+
+
+@router.post("/users/{user_id}/follow")
+async def follow_artist(user_id: str, body: dict):
+    """关注艺人"""
+    artist_name = body.get("artist_name", "")
+    if not artist_name:
+        raise HTTPException(status_code=400, detail="缺少 artist_name")
+    user = UserService.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    follows = user.get("followed_artists", [])
+    if artist_name not in follows:
+        follows.append(artist_name)
+        from repository.user_repo import UserRepository
+        UserRepository.update(user_id, {"followed_artists": follows})
+    return {"followed_artists": follows}
+
+
+@router.post("/users/{user_id}/unfollow")
+async def unfollow_artist(user_id: str, body: dict):
+    """取关艺人"""
+    artist_name = body.get("artist_name", "")
+    if not artist_name:
+        raise HTTPException(status_code=400, detail="缺少 artist_name")
+    user = UserService.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    follows = user.get("followed_artists", [])
+    if artist_name in follows:
+        follows.remove(artist_name)
+        from repository.user_repo import UserRepository
+        UserRepository.update(user_id, {"followed_artists": follows})
+    return {"followed_artists": follows}

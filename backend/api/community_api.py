@@ -1,9 +1,11 @@
 """
 社区 API 路由
-提供帖子列表、帖子详情、评论、点赞等接口
+提供帖子列表、帖子详情、评论、点赞、图片上传等接口
 """
+import os
+import uuid
 import logging
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File
 from typing import List
 from schema.community_schema import (
     PostCreateRequest,
@@ -15,6 +17,10 @@ from service.community_service import CommunityService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# 社区图片保存路径
+UPLOADS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "uploads")
+os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 
 @router.get("/posts", response_model=List[PostListResponse])
@@ -44,12 +50,16 @@ async def create_post(request: PostCreateRequest):
             user_id=request.user_id,
             content=request.content,
             image_url=request.image_url,
+            title=request.title,
+            tags=request.tags,
         )
         return PostListResponse(
             id=post["id"],
             user_id=post.get("user_id", ""),
+            title=post.get("title", ""),
             content=post.get("content", ""),
             image_url=post.get("image_url", ""),
+            tags=post.get("tags", []),
             likes_count=0,
             created_at=post.get("created_at", ""),
             comments_count=0,
@@ -57,6 +67,29 @@ async def create_post(request: PostCreateRequest):
     except Exception as e:
         logger.error(f"发布帖子失败: {e}")
         raise HTTPException(status_code=500, detail="发布失败")
+
+
+@router.post("/posts/upload-image")
+async def upload_post_image(file: UploadFile = File(...)):
+    """
+    社区帖子图片上传
+    返回图片 URL 供发帖时引用
+    """
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="仅支持图片文件")
+
+    ext = file.filename.rsplit(".", 1)[-1] if file.filename and "." in file.filename else "jpg"
+    filename = f"post_{uuid.uuid4()}.{ext}"
+    filepath = os.path.join(UPLOADS_DIR, filename)
+
+    content = await file.read()
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="图片不能超过 10MB")
+
+    with open(filepath, "wb") as f:
+        f.write(content)
+
+    return {"image_url": f"/uploads/{filename}"}
 
 
 @router.post("/posts/{post_id}/like")

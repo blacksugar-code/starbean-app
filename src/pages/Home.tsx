@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, ShoppingBag, Calendar, User, Mail, Plus, Camera, Heart, Verified, Trophy, Crown, Loader2 } from 'lucide-react';
 import { BottomNav } from '../components/BottomNav';
+import { useStore } from '../store/useStore';
 import * as api from '../services/api';
 import { API_BASE, resolveAssetUrl } from '../services/api';
 
 export const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'recommend' | 'star' | 'luck'>('recommend');
   const navigate = useNavigate();
+  const { user } = useStore();
 
   // 后端数据状态 - 无 Mock 数据，完全由后端驱动
   const [templates, setTemplates] = useState<api.TemplateData[]>([]);
@@ -15,6 +17,8 @@ export const Home: React.FC = () => {
   const [activeBanner, setActiveBanner] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [followedArtists, setFollowedArtists] = useState<string[]>([]);
+  const [showAllArtists, setShowAllArtists] = useState(false);
 
   /**
    * 从后端获取模板和 Banner 数据
@@ -24,12 +28,14 @@ export const Home: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const [tplData, bannerData] = await Promise.all([
+        const [tplData, bannerData, followsData] = await Promise.all([
           api.getTemplates(),
           fetch(API_BASE + '/admin/banners').then((r) => r.json()).catch(() => []),
+          user.id ? api.getFollows(user.id).catch(() => ({ followed_artists: [] })) : Promise.resolve({ followed_artists: [] }),
         ]);
         setTemplates(tplData);
         setBanners(bannerData);
+        setFollowedArtists(followsData.followed_artists || []);
       } catch (err: any) {
         setError('无法连接后端服务，请确认后端已启动');
         console.error('获取数据失败:', err);
@@ -38,7 +44,23 @@ export const Home: React.FC = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [user.id]);
+
+  /** 关注/取关艺人 */
+  const handleToggleFollow = async (artistName: string) => {
+    if (!user.id) return;
+    try {
+      if (followedArtists.includes(artistName)) {
+        const res = await api.unfollowArtist(user.id, artistName);
+        setFollowedArtists(res.followed_artists);
+      } else {
+        const res = await api.followArtist(user.id, artistName);
+        setFollowedArtists(res.followed_artists);
+      }
+    } catch (e) {
+      console.error('关注操作失败:', e);
+    }
+  };
 
   // Banner 自动轮播
   useEffect(() => {
@@ -160,23 +182,69 @@ export const Home: React.FC = () => {
         ))}
       </div>
 
-      {/* My Artists - 从模板数据中提取 */}
-      {artists.length > 0 && (
-        <div className="w-full overflow-hidden px-4 py-4">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-sm font-bold text-slate-800 dark:text-white">我的艺人</span>
-          </div>
-          <div className="flex flex-row items-start justify-start gap-4 overflow-x-auto pb-2 scrollbar-hide">
-            {artists.map((artist) => (
-              <div key={artist.name} className="flex flex-col items-center gap-2 shrink-0">
-                <div className="w-14 h-14 rounded-full border-[3px] border-pink-100 dark:border-pink-900 overflow-hidden shadow-sm p-0.5 bg-slate-200">
-                  {artist.avatar && (
-                    <img src={resolveAssetUrl(artist.avatar)} alt={artist.name} className="w-full h-full rounded-full object-cover" />
-                  )}
-                </div>
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{artist.name}</span>
+      {/* 我推 — 只显示已关注的艺人 */}
+      <div className="w-full overflow-hidden px-4 py-4">
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-sm font-bold text-slate-800 dark:text-white">我推</span>
+          {followedArtists.length > 0 && (
+            <button onClick={() => setShowAllArtists(true)} className="text-xs text-pink-500 font-medium">管理</button>
+          )}
+        </div>
+        <div className="flex flex-row items-start justify-start gap-4 overflow-x-auto pb-2 scrollbar-hide">
+          {/* 已关注的艺人 */}
+          {artists.filter((a) => followedArtists.includes(a.name)).map((artist) => (
+            <div key={artist.name} className="flex flex-col items-center gap-2 shrink-0 cursor-pointer" onClick={() => navigate(`/artist/${artist.name}`)}>
+              <div className="w-14 h-14 rounded-full border-[3px] border-pink-400 dark:border-pink-600 overflow-hidden shadow-sm p-0.5 bg-slate-200">
+                {artist.avatar && (
+                  <img src={resolveAssetUrl(artist.avatar)} alt={artist.name} className="w-full h-full rounded-full object-cover" />
+                )}
               </div>
-            ))}
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-300 max-w-[56px] truncate">{artist.name}</span>
+            </div>
+          ))}
+          {/* 添加按钮 */}
+          <div className="flex flex-col items-center gap-2 shrink-0 cursor-pointer" onClick={() => setShowAllArtists(true)}>
+            <div className="w-14 h-14 rounded-full border-2 border-dashed border-slate-300 dark:border-zinc-600 flex items-center justify-center bg-white dark:bg-zinc-800">
+              <Plus className="w-6 h-6 text-slate-400" />
+            </div>
+            <span className="text-xs font-medium text-slate-400">关注</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 全部艺人弹窗 — 关注/取关 */}
+      {showAllArtists && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-end justify-center" onClick={() => setShowAllArtists(false)}>
+          <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-t-2xl p-4 pb-8 max-h-[70vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-base font-bold text-slate-800 dark:text-white">全部艺人</h3>
+              <button onClick={() => setShowAllArtists(false)} className="text-slate-400 text-sm">完成</button>
+            </div>
+            <div className="grid grid-cols-4 gap-4">
+              {artists.map((artist) => {
+                const isFollowed = followedArtists.includes(artist.name);
+                return (
+                  <div key={artist.name} className="flex flex-col items-center gap-2">
+                    <div className={`w-14 h-14 rounded-full overflow-hidden border-[3px] ${isFollowed ? 'border-pink-400' : 'border-slate-200 dark:border-zinc-700'} p-0.5 bg-slate-200 relative`}>
+                      {artist.avatar && (
+                        <img src={resolveAssetUrl(artist.avatar)} alt={artist.name} className="w-full h-full rounded-full object-cover" />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-300 max-w-[56px] truncate">{artist.name}</span>
+                    <button
+                      onClick={() => handleToggleFollow(artist.name)}
+                      className={`text-[10px] px-3 py-1 rounded-full font-medium transition-colors ${
+                        isFollowed
+                          ? 'bg-slate-100 dark:bg-zinc-800 text-slate-500'
+                          : 'bg-pink-500 text-white'
+                      }`}
+                    >
+                      {isFollowed ? '已关注' : '+ 关注'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

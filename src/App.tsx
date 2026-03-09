@@ -20,6 +20,7 @@ import { InviteLottery } from './pages/InviteLottery';
 import { RechargePage } from './pages/RechargePage';
 import { useStore } from './store/useStore';
 import { CommunityPostDetail } from './pages/CommunityPostDetail';
+import { CommunityPublish } from './pages/CommunityPublish';
 
 /**
  * 认证守卫：未登录跳转 /auth
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/collection/artist/:artistId" element={<AuthGuard><CollectionArtistDetail /></AuthGuard>} />
         <Route path="/collection/:rarity" element={<AuthGuard><CollectionDetail /></AuthGuard>} />
         <Route path="/community" element={<AuthGuard><Community /></AuthGuard>} />
+        <Route path="/community/publish" element={<AuthGuard><CommunityPublish /></AuthGuard>} />
         <Route path="/community/post/:postId" element={<AuthGuard><CommunityPostDetail /></AuthGuard>} />
         <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
         <Route path="/avatar-generate" element={<AuthGuard><AvatarGenerate /></AuthGuard>} />

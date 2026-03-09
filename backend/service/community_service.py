@@ -27,11 +27,12 @@ class CommunityService:
                 "user_id": post.get("user_id", ""),
                 "user_name": user_info.get("name", "匿名用户"),
                 "user_avatar": user_info.get(
-                    "avatar_url",
-                    f"https://picsum.photos/seed/{post.get('user_id', 'u')}/50",
+                    "avatar_url", ""
                 ),
+                "title": post.get("title", ""),
                 "content": post.get("content", ""),
                 "image_url": post.get("image_url", ""),
+                "tags": post.get("tags", []),
                 "likes_count": post.get("likes_count", 0),
                 "created_at": post.get("created_at", ""),
                 "comments_count": comment_count,
@@ -66,8 +67,10 @@ class CommunityService:
             "user_id": post.get("user_id", ""),
             "user_name": user_info.get("name", "匿名用户"),
             "user_avatar": user_info.get("avatar_url", ""),
+            "title": post.get("title", ""),
             "content": post.get("content", ""),
             "image_url": post.get("image_url", ""),
+            "tags": post.get("tags", []),
             "likes_count": post.get("likes_count", 0),
             "created_at": post.get("created_at", ""),
             "comments": comments,
@@ -76,14 +79,17 @@ class CommunityService:
 
     @staticmethod
     def create_post(
-        user_id: str, content: str, image_url: str = ""
+        user_id: str, content: str, image_url: str = "",
+        title: str = "", tags: list = None
     ) -> Dict[str, Any]:
         """发布帖子"""
         post_data = {
             "id": str(uuid.uuid4()),
             "user_id": user_id,
+            "title": title,
             "content": content,
             "image_url": image_url,
+            "tags": tags or [],
             "likes_count": 0,
         }
         return PostRepository.create(post_data)

@@ -137,6 +137,27 @@ export async function getUser(userId: string): Promise<UserData> {
   return request<UserData>(`/users/${userId}`);
 }
 
+/** 获取用户关注的艺人列表 */
+export async function getFollows(userId: string): Promise<{ followed_artists: string[] }> {
+  return request<{ followed_artists: string[] }>(`/users/${userId}/follows`);
+}
+
+/** 关注艺人 */
+export async function followArtist(userId: string, artistName: string): Promise<{ followed_artists: string[] }> {
+  return request<{ followed_artists: string[] }>(`/users/${userId}/follow`, {
+    method: 'POST',
+    body: JSON.stringify({ artist_name: artistName }),
+  });
+}
+
+/** 取关艺人 */
+export async function unfollowArtist(userId: string, artistName: string): Promise<{ followed_artists: string[] }> {
+  return request<{ followed_artists: string[] }>(`/users/${userId}/unfollow`, {
+    method: 'POST',
+    body: JSON.stringify({ artist_name: artistName }),
+  });
+}
+
 /** 生成数字形象（上传照片） */
 export async function generateAvatar(userId: string, photos: File[]): Promise<{
   avatar_id: string;
