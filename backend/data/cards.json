@@ -405,5 +405,16 @@
     "series": "Series-张元英 is calling",
     "obtained_at": "now()",
     "created_at": "2026-03-09T14:08:19.972190"
+  },
+  {
+    "id": "c6c4299e-eb72-47e5-9ab5-8f2db125899a",
+    "user_id": "8ee1dfd1-55eb-47c3-bab1-79bd10e7ead3",
+    "name": "《逐玉》武安侯-N-1",
+    "rarity": "N",
+    "image_url": "/api/uploads/fusion_5fef968d-bbe1-46a1-9cb5-772eec6a85c8.png",
+    "artist_id": "7396a969-0c74-44fe-a5a3-334adb4caa46",
+    "series": "Series-《逐玉》武安侯",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T15:40:05.584112"
   }
 ]

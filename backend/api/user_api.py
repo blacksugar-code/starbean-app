@@ -124,10 +124,12 @@ async def generate_avatar(
         )
 
         if result["status"] == "success":
-            updated = UserService.update_avatar(user_id, result["image_url"])
+            # NOTE: 优先使用 data URI，确保线上部署不依赖临时磁盘
+            avatar_url = result.get("image_b64") or result["image_url"]
+            updated = UserService.update_avatar(user_id, avatar_url)
             return {
                 "avatar_id": result["id"],
-                "image_url": result["image_url"],
+                "image_url": avatar_url,
                 "user": updated,
             }
 

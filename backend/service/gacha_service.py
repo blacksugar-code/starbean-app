@@ -263,8 +263,11 @@ class GachaService:
         )
 
         image_url = fusion.get("image_url", "")
+        # NOTE: 优先使用 data URI，确保线上部署不依赖临时磁盘
+        image_b64 = fusion.get("image_b64", "")
+        save_url = image_b64 if image_b64 else image_url
 
         # 更新卡牌图片 URL
-        updated_card = CardRepository.update(card_id, {"image_url": image_url})
+        updated_card = CardRepository.update(card_id, {"image_url": save_url})
 
-        return updated_card or {**card, "image_url": image_url}
+        return updated_card or {**card, "image_url": save_url}

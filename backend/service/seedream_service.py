@@ -44,8 +44,8 @@ def _get_gemini_client():
 
 def _load_image_bytes(path_or_url: str) -> Optional[bytes]:
     """
-    从本地路径或 URL 加载图片字节数据
-    自动识别 /uploads/ 路径和网络 URL
+    从本地路径、URL 或 data URI 加载图片字节数据
+    自动识别 data URI、/uploads/ 路径和网络 URL
     """
     import httpx
 
@@ -53,7 +53,11 @@ def _load_image_bytes(path_or_url: str) -> Optional[bytes]:
         return None
 
     try:
-        if path_or_url.startswith("/api/uploads/") or path_or_url.startswith("/uploads/"):
+        # data URI 格式：直接解码 base64
+        if path_or_url.startswith("data:"):
+            b64_part = path_or_url.split(",", 1)[-1]
+            return base64.b64decode(b64_part)
+        elif path_or_url.startswith("/api/uploads/") or path_or_url.startswith("/uploads/"):
             filename = path_or_url.split("/")[-1]
             local_path = UPLOADS_DIR / filename
             if local_path.exists():
@@ -66,7 +70,7 @@ def _load_image_bytes(path_or_url: str) -> Optional[bytes]:
             with open(path_or_url, "rb") as f:
                 return f.read()
     except Exception as e:
-        logger.warning(f"加载图片失败 [{path_or_url}]: {e}")
+        logger.warning(f"加载图片失败 [{path_or_url[:50]}]: {e}")
 
     return None
 
@@ -195,7 +199,16 @@ class SeedreamService:
         filename = f"avatar_{avatar_id}.png"
         local_url = _save_image_bytes(result_bytes, filename)
 
-        return {"id": avatar_id, "image_url": local_url, "status": "success"}
+        # NOTE: 同时返回 data URI，线上部署不依赖磁盘文件
+        b64_str = base64.b64encode(result_bytes).decode("utf-8")
+        data_uri = f"data:image/png;base64,{b64_str}"
+
+        return {
+            "id": avatar_id,
+            "image_url": local_url,
+            "image_b64": data_uri,
+            "status": "success",
+        }
 
     @staticmethod
     def generate_fusion_image(
@@ -295,11 +308,19 @@ class SeedreamService:
                 raise ValueError("AI 生图超时，请稍后重试")
             raise
 
-        # 保存到本地
+        # 保存到本地（本地开发用）
         filename = f"fusion_{fusion_id}.png"
         local_url = _save_image_bytes(result_bytes, filename)
-        # NOTE: 合照保存后 URL 加 /api 前缀用于前端访问
         if local_url.startswith("/uploads/"):
             local_url = f"/api{local_url}"
 
-        return {"id": fusion_id, "image_url": local_url, "status": "success"}
+        # NOTE: 同时返回 data URI，线上部署不依赖磁盘文件
+        b64_str = base64.b64encode(result_bytes).decode("utf-8")
+        data_uri = f"data:image/png;base64,{b64_str}"
+
+        return {
+            "id": fusion_id,
+            "image_url": local_url,
+            "image_b64": data_uri,
+            "status": "success",
+        }
