@@ -129,13 +129,13 @@ def _call_gemini_generate(
         logger.info(f"参考图片{idx + 1} 已添加，大小={len(compressed)} bytes")
 
     logger.info(
-        f"调用 Gemini API，模型=gemini-2.5-flash-preview-image-generation，"
+        f"调用 Gemini API，模型=gemini-3.1-flash-image-preview，"
         f"图片数={len(contents) - 1}，prompt={prompt[:80]}..."
     )
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash-preview-image-generation",
+            model="gemini-3.1-flash-image-preview",
             contents=contents,
             config=types.GenerateContentConfig(
                 response_modalities=["TEXT", "IMAGE"],
