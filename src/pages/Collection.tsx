@@ -4,7 +4,7 @@ import { BottomNav } from '../components/BottomNav';
 import { Search, ChevronRight, Image as ImageIcon, Loader2, Camera, Sparkles, User, Upload, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import * as api from '../services/api';
-import { API_BASE } from '../services/api';
+import { API_BASE, resolveAssetUrl } from '../services/api';
 
 /** 卡牌数据（后端返回） */
 interface CardData {
@@ -276,7 +276,7 @@ export const Collection: React.FC = () => {
                 {/* 模板封面缩略图 */}
                 <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-800 shrink-0">
                   {group.coverImage ? (
-                    <img src={group.coverImage} alt="" className="w-full h-full object-cover" />
+                    <img src={resolveAssetUrl(group.coverImage)} alt="" className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <ImageIcon className="w-5 h-5 text-slate-300" />
@@ -330,7 +330,7 @@ export const Collection: React.FC = () => {
                       >
                         {hasImage ? (
                           <img
-                            src={card.image_url}
+                            src={resolveAssetUrl(card.image_url)}
                             alt={card.name}
                             className="w-full h-full object-cover"
                           />

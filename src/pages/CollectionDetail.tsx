@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '../services/api';
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
@@ -85,7 +86,7 @@ export const CollectionDetail: React.FC = () => {
         ) : (
           filteredCards.map((card) => (
             <div key={card.id} className={`relative ${layout.card} overflow-hidden bg-white dark:bg-zinc-900 shadow-sm group`}>
-              <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover" />
+              <img src={resolveAssetUrl(card.imageUrl)} alt={card.name} className="w-full h-full object-cover" />
               {/* Rarity Badge */}
               <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/50 backdrop-blur-md rounded-full text-[10px] font-bold text-white border border-white/10">
                 {card.rarity}

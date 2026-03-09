@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Star, X, Loader2, ImageIcon } from 'lucide-react';
 import * as api from '../../services/api';
-import { API_BASE } from '../../services/api';
+import { API_BASE, resolveAssetUrl } from '../../services/api';
 
 interface Artist {
   id: string;
@@ -120,7 +120,7 @@ export const ArtistAdmin: React.FC = () => {
             <div key={artist.id} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-4 group">
               <div className="w-14 h-14 rounded-full bg-gray-100 overflow-hidden shrink-0">
                 {artist.avatar_url ? (
-                  <img src={artist.avatar_url} alt={artist.name} className="w-full h-full object-cover" />
+                  <img src={resolveAssetUrl(artist.avatar_url)} alt={artist.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center"><Star className="w-6 h-6 text-gray-300" /></div>
                 )}
@@ -160,7 +160,7 @@ export const ArtistAdmin: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden shrink-0">
                     {formData.avatar_url ? (
-                      <img src={formData.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                      <img src={resolveAssetUrl(formData.avatar_url)} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-8 h-8 text-gray-300" /></div>
                     )}

@@ -3,11 +3,11 @@
     "id": "user_123",
     "name": "StarBean User",
     "avatar_url": "/uploads/avatar_ca056108-301f-4a33-a0aa-f921ff829c38.png",
-    "star_beans": 97914,
-    "fragments": 2,
+    "star_beans": 96826,
+    "fragments": 3,
     "digital_avatar_generated": true,
     "created_at": "2026-03-08T14:02:15.176884",
-    "pulls_since_last_ssr": 8,
-    "total_pulls": 23
+    "pulls_since_last_ssr": 20,
+    "total_pulls": 35
   }
 ]

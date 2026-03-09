@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, ShoppingBag, Calendar, User, Mail, Plus, Camera, Heart, Verified, Trophy, Crown, Loader2 } from 'lucide-react';
 import { BottomNav } from '../components/BottomNav';
 import * as api from '../services/api';
-import { API_BASE } from '../services/api';
+import { API_BASE, resolveAssetUrl } from '../services/api';
 
 export const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'recommend' | 'star' | 'luck'>('recommend');
@@ -75,7 +75,7 @@ export const Home: React.FC = () => {
          <span className="text-slate-500 text-base not-italic">{item.rank}</span>}
       </div>
       <div className="w-12 h-12 rounded-full border border-slate-100 dark:border-zinc-700 overflow-hidden mr-3 bg-slate-200 dark:bg-zinc-800">
-        {item.avatar && <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />}
+        {item.avatar && <img src={resolveAssetUrl(item.avatar)} alt={item.name} className="w-full h-full object-cover" />}
       </div>
       <div className="flex-1">
         <h3 className="font-bold text-slate-800 dark:text-white">{item.name}</h3>
@@ -116,7 +116,7 @@ export const Home: React.FC = () => {
                   onClick={() => b.link_url && navigate(b.link_url)}
                   style={{ cursor: b.link_url ? 'pointer' : 'default' }}
                 >
-                  <img src={b.image_url} alt="Banner" className="w-full h-full object-cover" />
+                  <img src={resolveAssetUrl(b.image_url)} alt="Banner" className="w-full h-full object-cover" />
                 </div>
               ))}
               {banners.length > 1 && (
@@ -132,7 +132,7 @@ export const Home: React.FC = () => {
               )}
             </>
           ) : templates.length > 0 && templates[0].cover_image ? (
-            <img src={templates[0].cover_image} alt="Banner" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={resolveAssetUrl(templates[0].cover_image)} alt="Banner" className="absolute inset-0 w-full h-full object-cover" />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <Sparkles className="w-16 h-16 text-pink-300/50" />
@@ -171,7 +171,7 @@ export const Home: React.FC = () => {
               <div key={artist.name} className="flex flex-col items-center gap-2 shrink-0">
                 <div className="w-14 h-14 rounded-full border-[3px] border-pink-100 dark:border-pink-900 overflow-hidden shadow-sm p-0.5 bg-slate-200">
                   {artist.avatar && (
-                    <img src={artist.avatar} alt={artist.name} className="w-full h-full rounded-full object-cover" />
+                    <img src={resolveAssetUrl(artist.avatar)} alt={artist.name} className="w-full h-full rounded-full object-cover" />
                   )}
                 </div>
                 <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{artist.name}</span>
@@ -250,7 +250,7 @@ export const Home: React.FC = () => {
                   >
                     <div className="relative w-full aspect-[3/4] overflow-hidden bg-slate-200 dark:bg-zinc-800">
                       {template.cover_image ? (
-                        <img src={template.cover_image} alt={template.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                        <img src={resolveAssetUrl(template.cover_image)} alt={template.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <Sparkles className="w-10 h-10 text-slate-300" />

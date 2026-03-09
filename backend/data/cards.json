@@ -251,5 +251,137 @@
     "series": "Series-《逐玉》剧组探班",
     "obtained_at": "now()",
     "created_at": "2026-03-09T01:52:14.049637"
+  },
+  {
+    "id": "89ad5cae-3182-4898-b3a9-150d5c64c830",
+    "user_id": "user_123",
+    "name": "棣棣“写真”-N-1",
+    "rarity": "N",
+    "image_url": "",
+    "artist_id": "cc0905a3-ba3f-42fb-b358-ccf219f88bb1",
+    "series": "Series-棣棣“写真”",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:55:53.377933"
+  },
+  {
+    "id": "4d53593a-23ea-48e7-bc1c-76f6a0e1afca",
+    "user_id": "user_123",
+    "name": "王一博的After Party-N-1",
+    "rarity": "N",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:24.082764"
+  },
+  {
+    "id": "93365b1c-4575-4629-a9e9-fde75d54e335",
+    "user_id": "user_123",
+    "name": "王一博的After Party-R-2",
+    "rarity": "R",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:24.083670"
+  },
+  {
+    "id": "540e4e8b-742c-4b5d-9a22-bc0c3c85d43a",
+    "user_id": "user_123",
+    "name": "王一博的After Party-SR-3",
+    "rarity": "SR",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:24.084596"
+  },
+  {
+    "id": "ba4c3035-c807-4e2b-9f9c-ddb5849b42ae",
+    "user_id": "user_123",
+    "name": "王一博的After Party-N-4",
+    "rarity": "N",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:24.086076"
+  },
+  {
+    "id": "59866894-ea9a-4cac-90ef-6a2ab8a4321c",
+    "user_id": "user_123",
+    "name": "王一博的After Party-N-5",
+    "rarity": "N",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:24.086784"
+  },
+  {
+    "id": "aa317935-acd0-4b29-8bdb-3d25ace0ba89",
+    "user_id": "user_123",
+    "name": "王一博的After Party-N-6",
+    "rarity": "N",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:24.087420"
+  },
+  {
+    "id": "2dde6730-9cbf-4898-b285-410fdbc64e4f",
+    "user_id": "user_123",
+    "name": "王一博的After Party-N-7",
+    "rarity": "N",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:24.088080"
+  },
+  {
+    "id": "3872bbbb-3bef-412e-849f-156b8ada0153",
+    "user_id": "user_123",
+    "name": "王一博的After Party-SR-8",
+    "rarity": "SR",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:24.088698"
+  },
+  {
+    "id": "22ff6236-860c-497d-ba20-932106e932dc",
+    "user_id": "user_123",
+    "name": "王一博的After Party-N-9",
+    "rarity": "N",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:24.089358"
+  },
+  {
+    "id": "34a872f5-f2af-4404-9e52-da264087ebad",
+    "user_id": "user_123",
+    "name": "王一博的After Party-R-10",
+    "rarity": "R",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:24.090103"
+  },
+  {
+    "id": "9ddbfdf9-f729-48de-8d70-4a2b006d4bf3",
+    "user_id": "user_123",
+    "name": "《逐玉》剧组探班-N-1",
+    "rarity": "N",
+    "image_url": "",
+    "artist_id": "56d19b31-299c-47e1-ad97-5e0301d83ade",
+    "series": "Series-《逐玉》剧组探班",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T12:57:46.330437"
   }
 ]

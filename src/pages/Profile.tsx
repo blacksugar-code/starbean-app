@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '../services/api';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Settings, ChevronRight, Wallet, Award, MessageSquare, MapPin,
@@ -111,7 +112,7 @@ export const Profile: React.FC = () => {
               className="w-16 h-16 rounded-full border-[3px] border-pink-200 overflow-hidden bg-slate-200 dark:bg-zinc-700 shrink-0 cursor-pointer relative group"
             >
               {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt="头像" className="w-full h-full object-cover" />
+                <img src={resolveAssetUrl(user.avatarUrl)} alt="头像" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-2xl">👤</div>
               )}

@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '../services/api';
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, Shield, Info, Loader2, X, CheckCircle, RefreshCw, ChevronLeft, Sparkles } from 'lucide-react';

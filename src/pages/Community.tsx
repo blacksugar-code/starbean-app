@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '../services/api';
 import React from 'react';
 import { Heart, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -35,7 +36,7 @@ export const Community: React.FC = () => {
               <p className="text-xs text-slate-800 dark:text-slate-200 font-medium mb-2 line-clamp-2">{post.content}</p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <img src={post.avatar} alt={post.user} className="w-5 h-5 rounded-full" />
+                  <img src={resolveAssetUrl(post.avatar)} alt={post.user} className="w-5 h-5 rounded-full" />
                   <span className="text-[10px] text-slate-500 truncate max-w-[60px]">{post.user}</span>
                 </div>
                 <div className="flex items-center gap-1 text-slate-400">

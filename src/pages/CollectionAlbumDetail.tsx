@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '../services/api';
 import React from 'react';
 import { useStore } from '../store/useStore';
 import { ArrowLeft, Search, Plus, ChevronRight, Lock } from 'lucide-react';
@@ -114,7 +115,7 @@ export const CollectionAlbumDetail: React.FC = () => {
                     return (
                       <div key={card.id} className="snap-center shrink-0 w-[85vw] aspect-[9/16] relative rounded-[2rem] overflow-hidden shadow-xl bg-white dark:bg-zinc-900 group">
                         <img 
-                          src={card.imageUrl} 
+                          src={resolveAssetUrl(card.imageUrl)} 
                           className={`w-full h-full object-cover transition-all duration-500 ${!owned ? 'grayscale opacity-60 blur-[2px]' : ''}`} 
                           alt={card.name} 
                         />
@@ -142,7 +143,7 @@ export const CollectionAlbumDetail: React.FC = () => {
                      return (
                        <div key={card.id} className="aspect-[4/5] rounded-2xl overflow-hidden shadow-md bg-white dark:bg-zinc-900 relative group">
                           <img 
-                            src={card.imageUrl} 
+                            src={resolveAssetUrl(card.imageUrl)} 
                             className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${!owned ? 'grayscale opacity-60' : ''}`} 
                             alt={card.name} 
                           />
@@ -164,7 +165,7 @@ export const CollectionAlbumDetail: React.FC = () => {
                      return (
                        <div key={card.id} className="aspect-[3/4] rounded-xl overflow-hidden shadow-sm bg-white dark:bg-zinc-900 relative group">
                           <img 
-                            src={card.imageUrl} 
+                            src={resolveAssetUrl(card.imageUrl)} 
                             className={`w-full h-full object-cover transition-all duration-300 ${!owned ? 'grayscale opacity-50' : ''}`} 
                             alt={card.name} 
                           />
@@ -186,7 +187,7 @@ export const CollectionAlbumDetail: React.FC = () => {
                      return (
                        <div key={card.id} className="aspect-square rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-zinc-900 relative p-2 flex items-center justify-center group hover:shadow-md transition-all">
                           <img 
-                            src={card.imageUrl} 
+                            src={resolveAssetUrl(card.imageUrl)} 
                             className={`w-full h-full object-cover rounded-lg transition-opacity ${!owned ? 'grayscale opacity-30' : 'opacity-100'}`} 
                             alt={card.name} 
                           />

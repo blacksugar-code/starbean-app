@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, GripVertical, ImageIcon, X, Loader2 } from 'lucide-react';
 import * as api from '../../services/api';
-import { API_BASE } from '../../services/api';
+import { API_BASE, resolveAssetUrl } from '../../services/api';
 
 interface Banner {
   id: string;
@@ -134,7 +134,7 @@ export const BannerAdmin: React.FC = () => {
             <div key={banner.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden flex items-center gap-4 p-4 group">
               <GripVertical className="w-5 h-5 text-gray-300 shrink-0 cursor-grab" />
               <div className="w-40 h-20 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                <img src={banner.image_url} alt="Banner" className="w-full h-full object-cover" />
+                <img src={resolveAssetUrl(banner.image_url)} alt="Banner" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-700 truncate">{banner.link_url || '无跳转链接'}</p>
@@ -169,7 +169,7 @@ export const BannerAdmin: React.FC = () => {
                 <p className="text-xs text-gray-400 mb-2">建议尺寸: 750×375px（2:1 比例）</p>
                 {formData.image_url ? (
                   <div className="relative w-full aspect-[2/1] rounded-lg overflow-hidden bg-gray-100">
-                    <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                    <img src={resolveAssetUrl(formData.image_url)} alt="Preview" className="w-full h-full object-cover" />
                     <button
                       onClick={() => setFormData((prev) => ({ ...prev, image_url: '' }))}
                       className="absolute top-2 right-2 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center"

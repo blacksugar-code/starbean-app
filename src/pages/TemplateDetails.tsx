@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Share2, Star, ChevronRight, Info, Sparkles, Loader2 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import * as api from '../services/api';
+import { resolveAssetUrl } from '../services/api';
 
 export const TemplateDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -60,7 +61,7 @@ export const TemplateDetails: React.FC = () => {
       {/* Hero Image - 使用 detail_image 或 cover_image */}
       <div className="relative w-full h-[60vh]">
         {(template.detail_image || template.cover_image) ? (
-          <img src={template.detail_image || template.cover_image} alt={template.title} className="absolute inset-0 w-full h-full object-cover" />
+          <img src={resolveAssetUrl(template.detail_image || template.cover_image)} alt={template.title} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-pink-400/30 to-purple-500/30 flex items-center justify-center">
             <Sparkles className="w-20 h-20 text-pink-300/50" />

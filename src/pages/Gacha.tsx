@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ChevronLeft, Gem, Loader2, Camera, Archive, Star, Upload, User } from 'lucide-react';
 import { useStore, Card } from '../store/useStore';
 import * as api from '../services/api';
-import { API_BASE } from '../services/api';
+import { API_BASE, resolveAssetUrl } from '../services/api';
 
 type Stage = 'idle' | 'animating' | 'reveal' | 'generating';
 
@@ -205,7 +205,7 @@ export const Gacha: React.FC = () => {
       {/* ===== 背景 ===== */}
       {template?.cover_image && stage === 'idle' && (
         <div className="absolute inset-0">
-          <img src={template.cover_image} alt="" className="w-full h-full object-cover opacity-20" />
+          <img src={resolveAssetUrl(template.cover_image)} alt="" className="w-full h-full object-cover opacity-20" />
         </div>
       )}
       <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900" />
@@ -479,7 +479,7 @@ export const Gacha: React.FC = () => {
               className="w-56 h-72 rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_40px_rgba(236,72,153,0.3)] mb-8 relative group"
             >
               {template?.cover_image ? (
-                <img src={template.cover_image} alt={template.title} className="w-full h-full object-cover" />
+                <img src={resolveAssetUrl(template.cover_image)} alt={template.title} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-pink-500/30 to-purple-600/30 flex items-center justify-center">
                   <Sparkles className="w-20 h-20 text-pink-300 animate-pulse" />

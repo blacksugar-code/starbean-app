@@ -13,6 +13,19 @@ export const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 export const BACKEND_BASE = API_BASE.replace(/\/api$/, '');
 
 /**
+ * 将后端返回的相对路径转为完整 URL
+ * 本地环境直接返回原路径（Vite proxy 转发）
+ * 部署环境拼接 BACKEND_BASE
+ * @param path 后端返回的路径，如 /uploads/xxx.png 或 /api/uploads/xxx.png
+ */
+export function resolveAssetUrl(path: string | undefined | null): string {
+  if (!path) return '';
+  // 已经是完整 URL 则直接返回
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `${BACKEND_BASE}${path}`;
+}
+
+/**
  * 通用请求封装
  * @param url API 路径
  * @param options fetch 选项

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, MessageSquare, X, Loader2, ImageIcon } from 'lucide-react';
 import * as api from '../../services/api';
-import { API_BASE } from '../../services/api';
+import { API_BASE, resolveAssetUrl } from '../../services/api';
 
 interface Post {
   id: string;
@@ -92,7 +92,7 @@ export const CommunityAdmin: React.FC = () => {
                 </div>
                 {post.image_url && (
                   <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 ml-4 shrink-0">
-                    <img src={post.image_url} alt="" className="w-full h-full object-cover" />
+                    <img src={resolveAssetUrl(post.image_url)} alt="" className="w-full h-full object-cover" />
                   </div>
                 )}
                 <button onClick={() => handleDelete(post.id)} className="ml-3 p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
@@ -118,7 +118,7 @@ export const CommunityAdmin: React.FC = () => {
                 <label className="text-sm font-medium text-gray-700 mb-1 block">配图（可选）</label>
                 {formData.image_url ? (
                   <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-gray-100">
-                    <img src={formData.image_url} className="w-full h-full object-cover" />
+                    <img src={resolveAssetUrl(formData.image_url)} className="w-full h-full object-cover" />
                     <button onClick={() => setFormData((p) => ({ ...p, image_url: '' }))} className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full text-xs flex items-center justify-center">✕</button>
                   </div>
                 ) : (

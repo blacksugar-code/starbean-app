@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, LayoutGrid, X, Loader2, ImageIcon, Upload } from 'lucide-react';
 import * as api from '../../services/api';
-import { API_BASE } from '../../services/api';
+import { API_BASE, resolveAssetUrl } from '../../services/api';
 
 interface Artist {
   id: string;
@@ -234,7 +234,7 @@ export const TemplateAdmin: React.FC = () => {
             <div key={tpl.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden group">
               <div className="aspect-[3/4] bg-gray-100 relative">
                 {tpl.cover_image ? (
-                  <img src={tpl.cover_image} alt={tpl.title} className="w-full h-full object-cover" />
+                  <img src={resolveAssetUrl(tpl.cover_image)} alt={tpl.title} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-10 h-10 text-gray-300" /></div>
                 )}

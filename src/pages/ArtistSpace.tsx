@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '../services/api';
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Share2, Plus, Camera } from 'lucide-react';
@@ -40,7 +41,7 @@ export const ArtistSpace: React.FC = () => {
         <div className="flex items-center overflow-x-auto scrollbar-hide py-3 px-4 gap-4">
           <div className="flex items-center gap-3 shrink-0">
             <div className="w-10 h-10 rounded-full bg-pink-100 border border-white overflow-hidden shadow-sm">
-              <img src={artist.avatar} alt={artist.name} className="w-full h-full object-cover" />
+              <img src={resolveAssetUrl(artist.avatar)} alt={artist.name} className="w-full h-full object-cover" />
             </div>
             <div>
               <h1 className="text-base font-bold leading-none text-slate-900 dark:text-white">{artist.name}</h1>

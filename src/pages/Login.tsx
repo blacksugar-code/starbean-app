@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '../services/api';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, Shield, Info, ArrowRight, Loader2 } from 'lucide-react';

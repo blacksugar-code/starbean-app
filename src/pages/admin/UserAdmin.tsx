@@ -1,4 +1,4 @@
-import { API_BASE } from '../../services/api';
+import { API_BASE, resolveAssetUrl } from '../../services/api';
 import React, { useState, useEffect } from 'react';
 import { Trash2, Users, Eye, X, Loader2, Edit2, Gem, Check } from 'lucide-react';
 
@@ -117,7 +117,7 @@ export const UserAdmin: React.FC = () => {
               {users.map((u) => (
                 <tr key={u.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3"><div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gray-100 overflow-hidden">{u.avatar_url ? <img src={u.avatar_url} className="w-full h-full object-cover" /> : <Users className="w-full h-full p-2 text-gray-300" />}</div>
+                    <div className="w-9 h-9 rounded-full bg-gray-100 overflow-hidden">{u.avatar_url ? <img src={resolveAssetUrl(u.avatar_url)} className="w-full h-full object-cover" /> : <Users className="w-full h-full p-2 text-gray-300" />}</div>
                     <span className="font-medium text-gray-800">{u.name}</span>
                   </div></td>
                   <td className="px-4 py-3 text-gray-400 text-xs font-mono">{u.id}</td>
@@ -160,7 +160,7 @@ export const UserAdmin: React.FC = () => {
              : userCards.length === 0 ? <p className="text-sm text-gray-400 text-center py-8">暂无</p>
              : <div className="grid grid-cols-4 gap-3">{userCards.map((c) => (
               <div key={c.id} className="rounded-lg border overflow-hidden">
-                <div className="aspect-[3/4] bg-gray-100">{c.image_url && <img src={c.image_url} className="w-full h-full object-cover" />}</div>
+                <div className="aspect-[3/4] bg-gray-100">{c.image_url && <img src={resolveAssetUrl(c.image_url)} className="w-full h-full object-cover" />}</div>
                 <div className="p-2"><span className={`text-xs font-bold px-1.5 py-0.5 rounded ${rc(c.rarity)}`}>{c.rarity}</span></div>
               </div>
             ))}</div>}

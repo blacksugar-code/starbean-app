@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '../services/api';
 import React, { useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { Download, Share2, RefreshCw, Home, ArrowLeft, MessageCircle, Aperture, BookOpen, Eye, Music, X, Check } from 'lucide-react';
@@ -69,7 +70,7 @@ export const Result: React.FC = () => {
           // Single Card View
           <div className="w-full max-w-sm flex flex-col items-center">
             <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl mb-6 group bg-slate-200 dark:bg-zinc-800">
-              <img src={cards[0].imageUrl} alt={cards[0].name} className="w-full h-full object-cover" />
+              <img src={resolveAssetUrl(cards[0].imageUrl)} alt={cards[0].name} className="w-full h-full object-cover" />
               
               <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1 rounded-full">
                 <span className={`text-lg font-black ${
@@ -94,7 +95,7 @@ export const Result: React.FC = () => {
           <div className="w-full max-w-md grid grid-cols-2 gap-4 mb-8">
             {cards.map((card) => (
               <div key={card.id} className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md bg-slate-200 dark:bg-zinc-800 group">
-                <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover" />
+                <img src={resolveAssetUrl(card.imageUrl)} alt={card.name} className="w-full h-full object-cover" />
                 <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold text-white border border-white/10">
                   <span className={`${
                     card.rarity === 'SSR' ? 'text-yellow-400' :

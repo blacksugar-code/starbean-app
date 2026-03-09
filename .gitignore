@@ -21,11 +21,7 @@ backend/.env
 # Gemini
 .gemini/
 
-# 上传文件（本地开发用）
-backend/uploads/*.png
-backend/uploads/*.jpg
-backend/uploads/*.jpeg
-!backend/uploads/.gitkeep
+# 临时上传文件
 
 # 临时文件
 backend/temp_uploads/
