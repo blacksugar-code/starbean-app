@@ -18,6 +18,7 @@ from api.gacha_api import router as gacha_router
 from api.artist_api import router as artist_router
 from api.community_api import router as community_router
 from api.admin_api import router as admin_router
+from api.auth_api import router as auth_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -51,6 +52,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # 挂载路由
+app.include_router(auth_router, prefix="/api", tags=["认证"])
 app.include_router(user_router, prefix="/api", tags=["用户"])
 app.include_router(gacha_router, prefix="/api", tags=["抽卡"])
 app.include_router(artist_router, prefix="/api", tags=["艺人与模板"])

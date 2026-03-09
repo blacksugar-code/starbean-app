@@ -26,18 +26,41 @@ export function resolveAssetUrl(path: string | undefined | null): string {
 }
 
 /**
+ * 从 localStorage 获取保存的 auth token
+ */
+function getAuthToken(): string | null {
+  try {
+    const stored = localStorage.getItem('starbean-auth');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed?.state?.token || null;
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+/**
  * 通用请求封装
+ * 自动附带 Authorization 头（如果已登录）
  * @param url API 路径
  * @param options fetch 选项
  * @returns 解析后的 JSON 响应
  */
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+
+  // 自动附加认证 token
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_BASE}${url}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
     ...options,
+    headers,
   });
 
   if (!response.ok) {
@@ -46,6 +69,45 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   }
 
   return response.json();
+}
+
+// ==================== 认证 API ====================
+
+/** 认证响应 */
+export interface AuthResponseData {
+  token: string;
+  user: UserData;
+}
+
+/**
+ * 用户注册
+ * @param username 用户名（2-20 字符）
+ * @param password 密码（6-50 字符）
+ */
+export async function authRegister(username: string, password: string): Promise<AuthResponseData> {
+  return request<AuthResponseData>('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  });
+}
+
+/**
+ * 用户登录
+ * @param username 用户名
+ * @param password 密码
+ */
+export async function authLogin(username: string, password: string): Promise<AuthResponseData> {
+  return request<AuthResponseData>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  });
+}
+
+/**
+ * 获取当前登录用户信息（需要 token）
+ */
+export async function getMe(): Promise<UserData> {
+  return request<UserData>('/auth/me');
 }
 
 // ==================== 用户接口 ====================

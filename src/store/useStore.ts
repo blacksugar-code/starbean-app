@@ -19,6 +19,7 @@ export interface Card {
 
 export interface User {
   id: string;
+  username?: string;
   name: string;
   avatarUrl: string;
   /** AI 虚拟形象 URL，与头像分开管理 */
@@ -32,9 +33,21 @@ export interface User {
 }
 
 interface StoreState {
+  // 认证状态
+  token: string;
   user: User;
   isLoading: boolean;
   error: string | null;
+
+  /** 是否已登录 */
+  isLoggedIn: () => boolean;
+
+  // 认证操作
+  login: (username: string, password: string) => Promise<void>;
+  register: (username: string, password: string) => Promise<void>;
+  logout: () => void;
+  /** 用 token 恢复用户信息 */
+  restoreSession: () => Promise<void>;
 
   // 用户操作
   setUser: (user: User) => void;
@@ -67,13 +80,14 @@ interface StoreState {
   addToCollection: (card: Card) => void;
 }
 
-const INITIAL_USER: User = {
-  id: 'user_123',
-  name: 'StarBean User',
+/** 未登录时的空用户 */
+const EMPTY_USER: User = {
+  id: '',
+  name: '',
   avatarUrl: '',
   digitalAvatarUrl: '',
-  starBeans: 1250,
-  fragments: 25,
+  starBeans: 0,
+  fragments: 0,
   collection: [],
   digitalAvatarGenerated: false,
   pullsSinceLastSsr: 0,
@@ -87,6 +101,7 @@ const INITIAL_USER: User = {
 function mapUserData(data: api.UserData, existingCollection: Card[] = []): User {
   return {
     id: data.id,
+    username: (data as any).username || '',
     name: data.name,
     avatarUrl: data.avatar_url,
     digitalAvatarUrl: (data as any).digital_avatar_url || data.avatar_url || '',
@@ -120,7 +135,8 @@ function mapCardData(data: api.CardData): Card {
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
-      user: INITIAL_USER,
+      token: '',
+      user: EMPTY_USER,
       isLoading: false,
       error: null,
 
@@ -130,6 +146,68 @@ export const useStore = create<StoreState>()(
       setAvatarGenerateStep: (step: 'upload' | 'generating' | 'preview') => set({ avatarGenerateStep: step }),
       setGeneratedAvatarUrl: (url: string) => set({ generatedAvatarUrl: url }),
 
+      /** 判断是否已登录（有 token 且有 user.id） */
+      isLoggedIn: () => {
+        const state = get();
+        return !!state.token && !!state.user.id;
+      },
+
+      /** 用户名+密码登录 */
+      login: async (username: string, password: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const result = await api.authLogin(username, password);
+          set({
+            token: result.token,
+            user: mapUserData(result.user),
+            isLoading: false,
+          });
+        } catch (e: any) {
+          set({ isLoading: false });
+          throw e;
+        }
+      },
+
+      /** 用户名+密码注册（注册成功后自动登录） */
+      register: async (username: string, password: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const result = await api.authRegister(username, password);
+          set({
+            token: result.token,
+            user: mapUserData(result.user),
+            isLoading: false,
+          });
+        } catch (e: any) {
+          set({ isLoading: false });
+          throw e;
+        }
+      },
+
+      /** 登出 */
+      logout: () => {
+        set({
+          token: '',
+          user: EMPTY_USER,
+          avatarGenerateStep: 'upload',
+          generatedAvatarUrl: '',
+        });
+      },
+
+      /** 恢复会话：用保存的 token 获取用户信息 */
+      restoreSession: async () => {
+        const { token } = get();
+        if (!token) return;
+        try {
+          const data = await api.getMe();
+          const existing = get().user.collection;
+          set({ user: mapUserData(data, existing) });
+        } catch {
+          // Token 过期或无效，清除登录状态
+          set({ token: '', user: EMPTY_USER });
+        }
+      },
+
       setUser: (user) => set({ user }),
 
       // NOTE: setUserAvatar 只修改头像，不影响虚拟形象
@@ -138,7 +216,7 @@ export const useStore = create<StoreState>()(
           user: { ...state.user, avatarUrl: url },
         })),
 
-      resetUser: () => set({ user: INITIAL_USER }),
+      resetUser: () => set({ user: EMPTY_USER, token: '' }),
 
       // 从后端获取用户信息
       fetchUser: async (userId: string) => {
@@ -280,7 +358,8 @@ export const useStore = create<StoreState>()(
         })),
     }),
     {
-      name: 'starbean-storage',
+      // NOTE: persist key 改为 starbean-auth，api.ts 的 getAuthToken 需要与此一致
+      name: 'starbean-auth',
     },
   ),
 );

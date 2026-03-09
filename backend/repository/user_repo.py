@@ -25,6 +25,16 @@ class UserRepository:
         return None
 
     @staticmethod
+    def get_by_username(username: str) -> Optional[Dict[str, Any]]:
+        """根据用户名获取用户"""
+        response = supabase.table(UserRepository.TABLE).select("*").eq(
+            "username", username
+        ).execute()
+        if response.data and len(response.data) > 0:
+            return response.data[0]
+        return None
+
+    @staticmethod
     def create(user_data: Dict[str, Any]) -> Dict[str, Any]:
         """创建用户"""
         response = supabase.table(UserRepository.TABLE).insert(

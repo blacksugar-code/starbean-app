@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Settings, ChevronRight, Wallet, Award, MessageSquare, MapPin,
   Headphones, Rocket, Gift, Sparkles, Star, Gem, Camera, ImageIcon,
-  CreditCard, ListOrdered, ChevronDown, X
+  CreditCard, ListOrdered, ChevronDown, X, LogOut
 } from 'lucide-react';
 import { useStore, type Rarity } from '../store/useStore';
 import { BottomNav } from '../components/BottomNav';
@@ -245,6 +245,17 @@ export const Profile: React.FC = () => {
           onCancel={() => setCropFile(null)}
         />
       )}
+
+      {/* 退出登录 */}
+      <div className="px-4 pb-4">
+        <button
+          onClick={() => { useStore.getState().logout(); navigate('/auth'); }}
+          className="w-full py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl text-sm text-red-500 font-medium flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          退出登录
+        </button>
+      </div>
 
       <BottomNav />
     </div>
