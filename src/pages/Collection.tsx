@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { BottomNav } from '../components/BottomNav';
-import { Search, ChevronRight, Image as ImageIcon, Loader2, Camera, Sparkles, User, Upload, X } from 'lucide-react';
+import { Search, ChevronRight, Image as ImageIcon, Loader2, Camera, Sparkles, User, Upload, X, Download, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import * as api from '../services/api';
 import { API_BASE, resolveAssetUrl } from '../services/api';
@@ -50,6 +50,10 @@ export const Collection: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<string>('全部');
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [generatingCardId, setGeneratingCardId] = useState<string | null>(null);
+
+  // 卡牌预览弹窗
+  const [previewCard, setPreviewCard] = useState<CardData | null>(null);
+  const [saveToast, setSaveToast] = useState(false);
 
   // 模式选择弹窗
   const [showModeModal, setShowModeModal] = useState(false);
@@ -323,10 +327,14 @@ export const Collection: React.FC = () => {
                     return (
                       <div
                         key={card.id}
-                        onClick={() => !hasImage && !isGenerating && handleCardClick(card)}
-                        className={`relative aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-800 group ${
-                          !hasImage ? 'cursor-pointer active:scale-95 transition-transform' : ''
-                        }`}
+                        onClick={() => {
+                          if (hasImage) {
+                            setPreviewCard(card);
+                          } else if (!isGenerating) {
+                            handleCardClick(card);
+                          }
+                        }}
+                        className={`relative aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-800 group cursor-pointer active:scale-95 transition-transform`}
                       >
                         {hasImage ? (
                           <img
@@ -410,6 +418,107 @@ export const Collection: React.FC = () => {
               </div>
             </button>
           </div>
+        </div>
+      )}
+
+      {/* 卡牌全屏预览弹窗 */}
+      {previewCard && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center"
+          onClick={() => setPreviewCard(null)}
+        >
+          {/* 关闭按钮 */}
+          <button className="absolute top-4 right-4 z-10" onClick={() => setPreviewCard(null)}>
+            <X className="w-7 h-7 text-white/70" />
+          </button>
+
+          {/* 卡牌名称和等级 */}
+          <div className="mb-4 text-center">
+            <span className={`inline-block px-3 py-1 rounded-full text-xs font-black mb-2 ${
+              (RARITY_COLORS[previewCard.rarity] || RARITY_COLORS.N).bg
+            } ${
+              (RARITY_COLORS[previewCard.rarity] || RARITY_COLORS.N).text
+            }`}>
+              {previewCard.rarity}
+            </span>
+            <h3 className="text-white font-bold text-sm">{previewCard.name}</h3>
+          </div>
+
+          {/* 稀有度发光边框卡牌 */}
+          <div
+            className={`relative rounded-2xl p-1 max-w-[85vw] max-h-[60vh] ${
+              previewCard.rarity === 'SSR' ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-yellow-300 shadow-[0_0_40px_rgba(251,191,36,0.5)]' :
+              previewCard.rarity === 'SR' ? 'bg-gradient-to-br from-purple-500 via-indigo-500 to-purple-400 shadow-[0_0_30px_rgba(139,92,246,0.4)]' :
+              previewCard.rarity === 'R' ? 'bg-gradient-to-br from-blue-400 via-cyan-500 to-blue-300 shadow-[0_0_25px_rgba(56,189,248,0.4)]' :
+              'bg-gradient-to-br from-slate-300 to-slate-400'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={resolveAssetUrl(previewCard.image_url)}
+              alt={previewCard.name}
+              className="rounded-xl max-w-full max-h-[58vh] object-contain bg-black"
+            />
+          </div>
+
+          {/* 操作按钮 */}
+          <div className="flex gap-6 mt-6" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={async () => {
+                try {
+                  const imgUrl = resolveAssetUrl(previewCard.image_url);
+                  const response = await fetch(imgUrl);
+                  const blob = await response.blob();
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${previewCard.name}.png`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  setSaveToast(true);
+                  setTimeout(() => setSaveToast(false), 2000);
+                } catch {
+                  alert('保存失败，请长按图片保存');
+                }
+              }}
+              className="flex flex-col items-center gap-1.5 text-white/80 hover:text-white transition-colors"
+            >
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
+                <Download className="w-5 h-5" />
+              </div>
+              <span className="text-[10px]">保存相册</span>
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  if (navigator.share) {
+                    const imgUrl = resolveAssetUrl(previewCard.image_url);
+                    const response = await fetch(imgUrl);
+                    const blob = await response.blob();
+                    const file = new File([blob], `${previewCard.name}.png`, { type: 'image/png' });
+                    await navigator.share({ files: [file], title: previewCard.name });
+                  } else {
+                    alert('请截图后分享到社交平台');
+                  }
+                } catch {
+                  /* 用户取消分享 */
+                }
+              }}
+              className="flex flex-col items-center gap-1.5 text-white/80 hover:text-white transition-colors"
+            >
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
+                <Share2 className="w-5 h-5" />
+              </div>
+              <span className="text-[10px]">分享</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 保存成功提示 */}
+      {saveToast && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[300] bg-black/80 text-white px-6 py-3 rounded-xl text-sm font-medium">
+          已保存到相册 ✓
         </div>
       )}
 
