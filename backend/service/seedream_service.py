@@ -118,7 +118,7 @@ def _call_seedream_api(
         "n": 1,
     }
 
-    logger.info(f"调用 SeedReam API，图片数={len(images)}，prompt={prompt[:50]}...")
+    logger.info(f"调用 SeedReam API，图片数={len(images)}，prompt长度={len(prompt)}，prompt={prompt[:80]}...")
 
     response = httpx.post(
         f"{ARK_BASE_URL}/images/generations",
@@ -131,9 +131,19 @@ def _call_seedream_api(
     )
 
     if response.status_code != 200:
-        error_detail = response.text[:500]
-        logger.error(f"SeedReam API 错误 {response.status_code}: {error_detail}")
-        raise ValueError(f"SeedReam API 返回错误 (HTTP {response.status_code})")
+        error_detail = response.text[:1000]
+        logger.error(
+            f"SeedReam API 错误 {response.status_code}: {error_detail}\n"
+            f"请求 prompt: {prompt[:200]}\n"
+            f"图片数: {len(images)}"
+        )
+        # 尝试解析错误详情返回给前端
+        try:
+            err_json = response.json()
+            err_msg = err_json.get("error", {}).get("message", error_detail[:200])
+        except Exception:
+            err_msg = error_detail[:200]
+        raise ValueError(f"AI 生图失败: {err_msg}")
 
     result = response.json()
     data_list = result.get("data", [])

@@ -383,5 +383,16 @@
     "series": "Series-《逐玉》剧组探班",
     "obtained_at": "now()",
     "created_at": "2026-03-09T12:57:46.330437"
+  },
+  {
+    "id": "9eed5e16-1445-49a4-9b20-57f714fad330",
+    "user_id": "8ee1dfd1-55eb-47c3-bab1-79bd10e7ead3",
+    "name": "王一博的After Party-N-1",
+    "rarity": "N",
+    "image_url": "",
+    "artist_id": "41234e63-ec49-4e45-a627-3b6010024217",
+    "series": "Series-王一博的After Party",
+    "obtained_at": "now()",
+    "created_at": "2026-03-09T13:59:57.372564"
   }
 ]

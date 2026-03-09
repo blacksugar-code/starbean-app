@@ -35,7 +35,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 function GachaGuard() {
   const { user, isLoggedIn } = useStore();
   if (!isLoggedIn()) return <Navigate to="/auth" />;
-  return user.digitalAvatarGenerated ? <Gacha /> : <Navigate to="/login" />;
+  return user.digitalAvatarGenerated ? <Gacha /> : <Navigate to="/avatar-generate" />;
 }
 
 export default function App() {
